@@ -1,0 +1,199 @@
+{
+  "nodes": [
+    {
+      "id": "start",
+      "type": "story",
+      "position": { "x": 250, "y": 50 },
+      "data": { 
+        "label": "酒馆入口", 
+        "text": "你推开‘黑鱼酒馆’沉重的橡木门。屋内喧闹的声音扑面而来，空气中弥漫着麦芽酒和烤肉的香气。\n老板擦着杯子看向你：“哟，新面孔？想来点什么？”", 
+        "isStart": true,
+        "actions": [
+            { "type": "stat", "target": "gold", "operation": "=", "value": 50 },
+            { "type": "stat", "target": "hp", "operation": "=", "value": 100 },
+            { "type": "stat", "target": "dex", "operation": "=", "value": 60 }
+        ]
+      }
+    },
+    {
+      "id": "choice_bar",
+      "type": "choice",
+      "position": { "x": 250, "y": 250 },
+      "data": { 
+        "label": "回应老板", 
+        "text": "你的口袋里有50枚金币。", 
+        "choices": [
+          { "id": "opt1", "text": "来一杯招牌黑啤 (5金币)", "actions": [{ "type": "stat", "target": "gold", "operation": "-", "value": 5 }] },
+          { "id": "opt2", "text": "打听关于‘幽灵船’的消息", "actions": [] },
+          { "id": "opt4", "text": "试图偷取柜台上的藏宝图 (敏捷检定)", "actions": [] },
+          { "id": "opt3", "text": "转身离开", "actions": [] }
+        ]
+      }
+    },
+    {
+      "id": "drink_beer",
+      "type": "story",
+      "position": { "x": 0, "y": 450 },
+      "data": { 
+        "label": "喝酒", 
+        "text": "冰凉的啤酒顺喉而下，你的疲惫感消散了不少。\n(HP +1d10, 获得2个空酒杯)",
+        "actions": [
+            { "type": "stat", "target": "hp", "operation": "+", "value": "1d10" },
+            { "type": "item", "target": "空酒杯", "operation": "+", "value": "2" }
+        ]
+      }
+    },
+    {
+      "id": "rumor",
+      "type": "story",
+      "position": { "x": 250, "y": 450 },
+      "data": { 
+        "label": "打听消息", 
+        "text": "老板压低了声音：“嘘……那可不是什么好话题。不过看你面善，我只能告诉你，每逢月圆之夜，西海岸的灯塔下……”\n他塞给你一张皱巴巴的纸条。",
+        "actions": [
+            { "type": "item", "target": "神秘纸条", "operation": "+" },
+            { "type": "stat", "target": "knowledge", "operation": "+", "value": 1 }
+        ]
+      }
+    },
+    {
+      "id": "check_steal",
+      "type": "condition",
+      "position": { "x": 500, "y": 450 },
+      "data": {
+          "label": "偷窃检定",
+          "conditionMode": "check",
+          "checkTarget": "dex",
+          "checkDice": "1d100"
+      }
+    },
+    {
+      "id": "steal_success",
+      "type": "story",
+      "position": { "x": 400, "y": 650 },
+      "data": {
+          "label": "偷窃成功",
+          "text": "你趁老板不注意，手疾眼快地将藏宝图塞进了袖子里。\n(获得 藏宝图)",
+          "actions": [
+              { "type": "item", "target": "藏宝图", "operation": "+", "value": 1 }
+          ]
+      }
+    },
+    {
+      "id": "steal_fail",
+      "type": "story",
+      "position": { "x": 600, "y": 650 },
+      "data": {
+          "label": "偷窃失败",
+          "text": "“嘿！你在干什么！”老板一把抓住了你的手腕，周围的酒客纷纷围了上来。\n你被痛扁了一顿并扔出了酒馆。\n(HP -20)",
+          "actions": [
+              { "type": "stat", "target": "hp", "operation": "-", "value": 20 }
+          ]
+      }
+    },
+    {
+      "id": "leave",
+      "type": "story",
+      "position": { "x": 750, "y": 450 },
+      "data": { 
+        "label": "离开", 
+        "text": "你觉得这里太吵闹，转身走回了夜色中。\n你的冒险还没开始就结束了。",
+        "actions": []
+      }
+    },
+    {
+      "id": "drunk_event",
+      "type": "condition",
+      "position": { "x": 0, "y": 650 },
+      "data": { 
+        "label": "是否喝醉", 
+        "conditions": [
+            { "type": "stat", "target": "hp", "operation": ">", "value": 105 }
+        ],
+        "conditionLogic": "AND"
+      }
+    },
+    {
+      "id": "drunk_fight",
+      "type": "story",
+      "position": { "x": -150, "y": 850 },
+      "data": { 
+        "label": "酒后闹事", 
+        "text": "你喝得太嗨了，不小心撞到了旁边的大汉。一场混战在所难免！\n(进入战斗分支 - 未完待续)"
+      }
+    },
+    {
+      "id": "relax",
+      "type": "story",
+      "position": { "x": 100, "y": 850 },
+      "data": { 
+        "label": "惬意", 
+        "text": "你感到一阵惬意，找了个角落坐下休息。"
+      }
+    },
+    {
+      "id": "read_note",
+      "type": "choice",
+      "position": { "x": 250, "y": 650 },
+      "data": { 
+        "label": "阅读纸条", 
+        "text": "你借着烛光阅读纸条：'午夜十二点，带上朗姆酒。'", 
+        "choices": [
+            { "id": "c1", "text": "前往西海岸" },
+            { "id": "c2", "text": "把纸条扔了" }
+        ]
+      }
+    },
+    {
+      "id": "coast",
+      "type": "story",
+      "position": { "x": 200, "y": 850 },
+      "data": { 
+        "label": "西海岸", 
+        "text": "海浪拍打着礁石。你等到了午夜，一艘泛着绿光的破船缓缓浮出水面..."
+      }
+    },
+    {
+      "id": "throw_note",
+      "type": "story",
+      "position": { "x": 400, "y": 850 },
+      "data": { 
+        "label": "丢弃", 
+        "text": "你觉得这纯属无稽之谈，把纸条揉成一团丢进了垃圾桶。"
+      }
+    }
+  ],
+  "edges": [
+    { "id": "e1", "source": "start", "target": "choice_bar", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e2", "source": "choice_bar", "sourceHandle": "opt1", "target": "drink_beer", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e3", "source": "choice_bar", "sourceHandle": "opt2", "target": "rumor", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e4", "source": "choice_bar", "sourceHandle": "opt3", "target": "leave", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal", "source": "choice_bar", "sourceHandle": "opt4", "target": "check_steal", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e5", "source": "drink_beer", "target": "drunk_event", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e6", "source": "drunk_event", "sourceHandle": "true", "target": "drunk_fight", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e7", "source": "drunk_event", "sourceHandle": "false", "target": "relax", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e8", "source": "rumor", "target": "read_note", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e9", "source": "read_note", "sourceHandle": "c1", "target": "coast", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e10", "source": "read_note", "sourceHandle": "c2", "target": "throw_note", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal_s", "source": "check_steal", "sourceHandle": "success", "target": "steal_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal_f", "source": "check_steal", "sourceHandle": "failure", "target": "steal_fail", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal_gs", "source": "check_steal", "sourceHandle": "great_success", "target": "steal_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal_gf", "source": "check_steal", "sourceHandle": "great_failure", "target": "steal_fail", "markerEnd": { "type": "arrowclosed" } }
+  ],
+  "settings": {
+    "pluginName": "TavernTales",
+    "commandName": "tt",
+    "version": "1.0.0",
+    "author": "BlackfishUser",
+    "description": "一个关于酒馆、传闻与幽灵船的短篇互动故事。",
+    "homepage": "https://github.com/blackfish/stories",
+    "diceRules": {
+        "defaultDice": "1d100",
+        "successMode": "lte",
+        "criticalSuccess": 5,
+        "criticalFailure": 96,
+        "criticalSuccessMode": "lte",
+        "criticalFailureMode": "gte"
+    }
+  }
+}
