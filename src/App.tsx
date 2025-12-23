@@ -15,7 +15,7 @@ function App() {
             <div className="text-sm text-gray-400 hidden md:block">
               单人冒险故事！
             </div>
-            <a href="https://github.com/baiyu-yu/story-sealdicejs-editer" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors" title="GitHub Repository">
+            <a href="https://github.com/baiyu-yu/story-sealdicejs-editor" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors" title="GitHub Repository">
               <Github size={24} />
             </a>
           </div>
