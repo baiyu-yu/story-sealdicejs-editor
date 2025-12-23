@@ -9,8 +9,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@types/dagre": "^0.7.53",
     "@xyflow/react": "^12.0.0",
     "clsx": "^2.1.0",
+    "dagre": "^0.8.5",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "lucide-react": "^0.363.0",

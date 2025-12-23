@@ -11,8 +11,10 @@ import {
   Panel,
   Node,
   type NodeTypes,
+  useReactFlow,
 } from '@xyflow/react';
-import { Plus, Download, Upload, Save, Settings, AlertCircle, HelpCircle, Undo, Redo, Play, Trash2 } from 'lucide-react';
+import { Plus, Download, Upload, Save, Settings, AlertCircle, HelpCircle, Undo, Redo, Play, Trash2, Layout, GitBranch, MousePointer2 } from 'lucide-react';
+import dagre from 'dagre';
 import StoryNodeComponent from '../nodes/StoryNode';
 import ChoiceNodeComponent from '../nodes/ChoiceNode';
 import ConditionNodeComponent from '../nodes/ConditionNode';
@@ -49,7 +51,10 @@ export default function Editor() {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
-  const [settings, setSettings] = useState<ProjectSettings>(INITIAL_SETTINGS);
+      const [settings, setSettings] = useState<ProjectSettings>(INITIAL_SETTINGS);
+  const { fitView } = useReactFlow();
+  const [isTreeMode, setIsTreeMode] = useState(false);
+
 
   const commandHelpPreview = (() => {
     const sc = settings.subCommands || {};
@@ -96,6 +101,75 @@ export default function Editor() {
       });
       setHistoryIndex(prev => prev + 1);
   }, [nodes, edges, historyIndex]);
+
+  const onLayout = useCallback((direction = 'TB') => {
+    const dagreGraph = new dagre.graphlib.Graph();
+    dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+    const nodeWidth = 250;
+    const nodeHeight = 150;
+
+    dagreGraph.setGraph({ rankdir: direction });
+
+    nodes.forEach((node) => {
+      dagreGraph.setNode(node.id, { width: nodeWidth, height: nodeHeight });
+    });
+
+    edges.forEach((edge) => {
+      dagreGraph.setEdge(edge.source, edge.target);
+    });
+
+    dagre.layout(dagreGraph);
+
+    const layoutedNodes = nodes.map((node) => {
+      const nodeWithPosition = dagreGraph.node(node.id);
+      return {
+        ...node,
+        position: {
+          x: nodeWithPosition.x - nodeWidth / 2,
+          y: nodeWithPosition.y - nodeHeight / 2,
+        },
+      };
+    });
+    
+    pushHistory();
+    setNodes(layoutedNodes);
+    window.requestAnimationFrame(() => {
+      fitView();
+    });
+  }, [nodes, edges, setNodes, fitView, pushHistory]);
+
+  const toggleTreeMode = () => {
+    const newMode = !isTreeMode;
+    setIsTreeMode(newMode);
+    
+    // Update draggable state
+    setNodes((nds) => nds.map((node) => ({
+        ...node,
+        draggable: !newMode,
+    })));
+    
+    // Update edges type
+    setEdges((eds) => eds.map((edge) => ({
+        ...edge,
+        type: newMode ? 'smoothstep' : 'default',
+    })));
+
+    // Auto-layout when switching to Tree Mode
+    if (newMode) {
+        onLayout('LR'); // Left-to-Right for Mind Map style
+    }
+  };
+
+  // Update draggable state when mode changes (Effect removed as we handle it in toggle)
+  /* 
+  useEffect(() => {
+      setNodes((nds) => nds.map((node) => ({
+          ...node,
+          draggable: !isTreeMode,
+      })));
+  }, [isTreeMode, setNodes]); 
+  */
 
   // Initial history push
   useEffect(() => {
@@ -314,8 +388,8 @@ export default function Editor() {
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
   return (
-    <div className="flex w-full h-full">
-      <div className="flex-1 h-full relative">
+    <div className="flex flex-col md:flex-row w-full h-full">
+      <div className="flex-1 h-full relative order-1">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -327,6 +401,9 @@ export default function Editor() {
           onPaneClick={onPaneClick}
           nodeTypes={nodeTypes}
           fitView
+          minZoom={0.1}
+          maxZoom={4}
+          translateExtent={[[-50000, -50000], [50000, 50000]]}
           panOnScroll={false}
           panOnDrag={true}
           zoomOnPinch={true}
@@ -339,119 +416,223 @@ export default function Editor() {
           
           {/* Header Bar removed as it is now in App.tsx */}
 
-          <Panel position="top-left" className="bg-white p-1 md:p-2 rounded shadow flex gap-1 md:gap-2 flex-wrap max-w-[calc(100vw-20px)] md:max-w-[500px] overflow-x-auto no-scrollbar items-center">
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs md:text-sm whitespace-nowrap"
-              onClick={() => addNode('story')}
-            >
-              <Plus size={14} className="md:w-4 md:h-4" /> 剧情
-            </button>
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-xs md:text-sm whitespace-nowrap"
-              onClick={() => addNode('choice')}
-            >
-              <Plus size={14} className="md:w-4 md:h-4" /> 选项
-            </button>
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 text-xs md:text-sm whitespace-nowrap"
-              onClick={() => addNode('condition')}
-            >
-              <AlertCircle size={14} className="md:w-4 md:h-4" /> 判定
-            </button>
-            <div className="w-px h-6 bg-gray-300 mx-1 flex-shrink-0"></div>
-            {!nodes.find(n => n.data.isStart) && (
+          <Panel position="top-left" className="bg-white p-1 md:p-2 rounded shadow flex flex-wrap gap-1 md:gap-2 max-w-[calc(100vw-20px)] overflow-y-auto max-h-[30vh] md:max-h-none items-center">
+            {/* Add Nodes Group */}
+            <div className="flex items-center gap-1">
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs md:text-sm whitespace-nowrap"
+                onClick={() => addNode('story')}
+              >
+                <Plus size={14} className="md:w-4 md:h-4" /> 剧情
+              </button>
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-xs md:text-sm whitespace-nowrap"
+                onClick={() => addNode('choice')}
+              >
+                <Plus size={14} className="md:w-4 md:h-4" /> 选项
+              </button>
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 text-xs md:text-sm whitespace-nowrap"
+                onClick={() => addNode('condition')}
+              >
+                <AlertCircle size={14} className="md:w-4 md:h-4" /> 判定
+              </button>
+            </div>
+            
+            <div className="w-px h-4 bg-gray-300 mx-0.5 md:h-6 md:mx-1 flex-shrink-0"></div>
+            
+            {/* Layout & Mode Group */}
+            <div className="flex items-center gap-1">
+               <button
+                className="flex items-center gap-1 px-2 py-1 bg-cyan-600 text-white rounded hover:bg-cyan-700 text-xs md:text-sm whitespace-nowrap"
+                onClick={() => onLayout(isTreeMode ? 'LR' : 'TB')}
+                title="自动整理布局"
+              >
+                <Layout size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">整理</span>
+              </button>
+              <button
+                className={`flex items-center gap-1 px-2 py-1 rounded text-xs md:text-sm whitespace-nowrap ${isTreeMode ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                onClick={toggleTreeMode}
+                title="切换模式"
+              >
+                {isTreeMode ? <GitBranch size={14} className="md:w-4 md:h-4" /> : <MousePointer2 size={14} className="md:w-4 md:h-4" />} 
+                <span className="hidden md:inline">{isTreeMode ? '树状' : '自由'}</span>
+              </button>
+            </div>
+
+            {/* Mobile-only Groups (Hidden on Desktop) */}
+            <div className="flex md:hidden items-center gap-1">
+                <div className="w-px h-4 bg-gray-300 mx-0.5 flex-shrink-0"></div>
+                {/* Edit Group Mobile */}
                 <button
-                  className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs md:text-sm whitespace-nowrap"
-                  onClick={() => {
-                      pushHistory();
-                      setNodes(nds => nds.concat({
-                          id: `start_${Date.now()}`,
-                          type: 'story',
-                          position: { x: 250, y: 100 },
-                          data: { label: '开始', text: '故事从此开始...', isStart: true },
-                      }));
-                  }}
+                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs flex-shrink-0 ${historyIndex > 0 ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                    onClick={handleUndo}
+                    disabled={historyIndex <= 0}
                 >
-                  <Play size={14} className="md:w-4 md:h-4" /> 起点
+                    <Undo size={14} />
                 </button>
-            )}
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-xs md:text-sm whitespace-nowrap"
-              onClick={() => {
-                  if (confirm('确定要清空画布吗？所有节点将丢失。')) {
-                      pushHistory();
-                      setNodes([]);
-                      setEdges([]);
-                  }
-              }}
-            >
-              <Trash2 size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">清空</span>
-            </button>
-            <div className="w-px h-6 bg-gray-300 mx-1 flex-shrink-0"></div>
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800 text-xs md:text-sm whitespace-nowrap"
-              onClick={() => setShowSettings(true)}
-            >
-              <Settings size={14} className="md:w-4 md:h-4" /> 设置
-            </button>
+                <button
+                    className={`flex items-center gap-1 px-2 py-1 rounded text-xs flex-shrink-0 ${historyIndex < history.length - 1 ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                    onClick={handleRedo}
+                    disabled={historyIndex >= history.length - 1}
+                >
+                    <Redo size={14} />
+                </button>
+                <button
+                    className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-xs whitespace-nowrap"
+                    onClick={() => {
+                        if (confirm('确定要清空画布吗？所有节点将丢失。')) {
+                            pushHistory();
+                            setNodes([]);
+                            setEdges([]);
+                        }
+                    }}
+                >
+                    <Trash2 size={14} />
+                </button>
+
+                <div className="w-px h-4 bg-gray-300 mx-0.5 flex-shrink-0"></div>
+                
+                {/* File & Settings Group Mobile */}
+                 {!nodes.find(n => n.data.isStart) && (
+                  <button
+                    className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs whitespace-nowrap"
+                    onClick={() => {
+                        pushHistory();
+                        setNodes(nds => nds.concat({
+                            id: `start_${Date.now()}`,
+                            type: 'story',
+                            position: { x: 250, y: 100 },
+                            data: { label: '开始', text: '故事从此开始...', isStart: true },
+                        }));
+                    }}
+                  >
+                    <Play size={14} />
+                  </button>
+                )}
+                <button
+                    className="flex items-center gap-1 px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800 text-xs whitespace-nowrap"
+                    onClick={() => setShowSettings(true)}
+                >
+                    <Settings size={14} />
+                </button>
+                 <button
+                    className="flex items-center gap-1 px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-xs whitespace-nowrap"
+                    onClick={handleSaveProject}
+                >
+                    <Save size={14} />
+                </button>
+                <button
+                    className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs whitespace-nowrap"
+                    onClick={handleDownloadPlugin}
+                >
+                    <Download size={14} />
+                </button>
+            </div>
           </Panel>
 
-          <Panel position="top-right" className="bg-white p-1 md:p-2 rounded shadow flex gap-1 md:gap-2 flex-wrap justify-end max-w-[calc(100vw-20px)] md:max-w-none overflow-x-auto no-scrollbar items-center">
-            <button
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs md:text-sm flex-shrink-0 ${historyIndex > 0 ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-              onClick={handleUndo}
-              disabled={historyIndex <= 0}
-            >
-              <Undo size={14} className="md:w-4 md:h-4" />
-            </button>
-            <button
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs md:text-sm flex-shrink-0 ${historyIndex < history.length - 1 ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
-              onClick={handleRedo}
-              disabled={historyIndex >= history.length - 1}
-            >
-              <Redo size={14} className="md:w-4 md:h-4" />
-            </button>
+          {/* Desktop-only Right Panel */}
+          <Panel position="top-right" className="hidden md:flex bg-white p-2 rounded shadow gap-2 items-center">
+            {/* Edit Group */}
+            <div className="flex items-center gap-1">
+              <button
+                className={`flex items-center gap-1 px-2 py-1 rounded text-sm flex-shrink-0 ${historyIndex > 0 ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                onClick={handleUndo}
+                disabled={historyIndex <= 0}
+                title="撤销"
+              >
+                <Undo size={16} />
+              </button>
+              <button
+                className={`flex items-center gap-1 px-2 py-1 rounded text-sm flex-shrink-0 ${historyIndex < history.length - 1 ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                onClick={handleRedo}
+                disabled={historyIndex >= history.length - 1}
+                title="重做"
+              >
+                <Redo size={16} />
+              </button>
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm whitespace-nowrap"
+                onClick={() => {
+                    if (confirm('确定要清空画布吗？所有节点将丢失。')) {
+                        pushHistory();
+                        setNodes([]);
+                        setEdges([]);
+                    }
+                }}
+                title="清空"
+              >
+                <Trash2 size={16} />
+              </button>
+            </div>
+
             <div className="w-px h-6 bg-gray-300 mx-1 flex-shrink-0"></div>
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-xs md:text-sm whitespace-nowrap"
-              onClick={() => setShowGuide(true)}
-            >
-              <HelpCircle size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">帮助</span>
-            </button>
-            <div className="w-px h-6 bg-gray-300 mx-1 flex-shrink-0"></div>
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-xs md:text-sm whitespace-nowrap"
-              onClick={handleSaveProject}
-            >
-              <Save size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">保存</span>
-            </button>
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-xs md:text-sm whitespace-nowrap"
-              onClick={() => fileInputRef.current?.click()}
-            >
-              <Upload size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">读取</span>
-            </button>
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs md:text-sm whitespace-nowrap"
-              onClick={handleLoadExample}
-            >
-              <Upload size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">示例</span>
-            </button>
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept=".json"
-              onChange={handleLoadProject}
-            />
-            <div className="w-px h-6 bg-gray-300 mx-1 flex-shrink-0"></div>
-            <button
-              className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs md:text-sm whitespace-nowrap"
-              onClick={handleDownloadPlugin}
-            >
-              <Download size={14} className="md:w-4 md:h-4" /> 生成
-            </button>
+
+            {/* File & Settings Group */}
+            <div className="flex items-center gap-1">
+               {!nodes.find(n => n.data.isStart) && (
+                  <button
+                    className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm whitespace-nowrap"
+                    onClick={() => {
+                        pushHistory();
+                        setNodes(nds => nds.concat({
+                            id: `start_${Date.now()}`,
+                            type: 'story',
+                            position: { x: 250, y: 100 },
+                            data: { label: '开始', text: '故事从此开始...', isStart: true },
+                        }));
+                    }}
+                  >
+                    <Play size={16} /> 起点
+                  </button>
+              )}
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-gray-700 text-white rounded hover:bg-gray-800 text-sm whitespace-nowrap"
+                onClick={() => setShowSettings(true)}
+              >
+                <Settings size={16} /> 设置
+              </button>
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-sm whitespace-nowrap"
+                onClick={() => setShowGuide(true)}
+              >
+                <HelpCircle size={16} /> 帮助
+              </button>
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm whitespace-nowrap"
+                onClick={handleSaveProject}
+              >
+                <Save size={16} /> 保存
+              </button>
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-sm whitespace-nowrap"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                <Upload size={16} /> 读取
+              </button>
+               <button
+                className="flex items-center gap-1 px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-sm whitespace-nowrap"
+                onClick={handleLoadExample}
+              >
+                <Upload size={16} /> 示例
+              </button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept=".json"
+                onChange={handleLoadProject}
+              />
+              <button
+                className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm whitespace-nowrap"
+                onClick={handleDownloadPlugin}
+              >
+                <Download size={16} /> 生成
+              </button>
+            </div>
           </Panel>
+
+
         </ReactFlow>
 
       {/* Guide Modal */}
@@ -771,8 +952,8 @@ export default function Editor() {
 
       {/* Property Panel */}
       {selectedNode && (
-        <div className="fixed inset-0 md:static md:w-80 md:inset-auto z-50 md:z-auto bg-white md:bg-gray-50 border-t md:border-l md:border-t-0 border-gray-200 p-4 overflow-y-auto h-[60vh] md:h-full mt-auto md:mt-0 shadow-2xl md:shadow-none rounded-t-2xl md:rounded-none transition-transform duration-300 ease-in-out transform translate-y-0">
-          <div className="flex justify-between items-center mb-4">
+        <div className="order-2 w-full md:w-80 h-1/2 md:h-full bg-white md:bg-gray-50 border-t md:border-l md:border-t-0 border-gray-200 p-4 overflow-y-auto shadow-2xl md:shadow-none z-20 transition-all duration-300 flex flex-col">
+          <div className="flex justify-between items-center mb-4 flex-shrink-0">
               <h2 className="font-bold text-lg">编辑节点</h2>
               <button 
                   className="md:hidden p-2 text-gray-500 hover:text-gray-700 bg-gray-100 rounded-full"
