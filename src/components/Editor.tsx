@@ -648,7 +648,7 @@ export default function Editor() {
                           <li><strong>剧情节点</strong>：故事的基本单元，包含文本和可选的结算操作（获得物品/数值变更）。</li>
                           <li><strong>选项节点</strong>：提供分支选择，每个选项可以连接不同的后续剧情。</li>
                           <li><strong>判定节点</strong>：根据玩家属性或物品进行自动分歧（成功/失败）。</li>
-                          <li><strong>连线</strong>：拖动节点边缘的手柄（Handle）连接到另一个节点。</li>
+                          <li><strong>连线</strong>：拖动节点边缘的点点连接到另一个节点的点点。</li>
                       </ul>
 
                       <h3 className="font-bold text-gray-800 mt-4">移动端操作提示：</h3>
