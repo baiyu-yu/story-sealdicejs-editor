@@ -10,7 +10,6 @@ export interface SubCommandConfig {
 export interface ProjectSettings {
   pluginName: string;
   commandName: string;
-  commandHelp?: string;
   subCommands?: Partial<
     Record<'start' | 'next' | 'choose' | 'stat' | 'load' | 'reset' | 'clear', SubCommandConfig>
   >;

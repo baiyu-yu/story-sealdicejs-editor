@@ -50,6 +50,27 @@ export default function Editor() {
   const [showSettings, setShowSettings] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [settings, setSettings] = useState<ProjectSettings>(INITIAL_SETTINGS);
+
+  const commandHelpPreview = (() => {
+    const sc = settings.subCommands || {};
+    const cmdStart = sc.start?.name || 'start';
+    const cmdNext = sc.next?.name || 'next';
+    const cmdChoose = sc.choose?.name || 'choose';
+    const cmdStat = sc.stat?.name || 'stat';
+    const cmdLoad = sc.load?.name || 'load';
+    const cmdReset = sc.reset?.name || 'reset';
+    const cmdClear = sc.clear?.name || 'clear';
+
+    const descStart = sc.start?.help || '开始故事';
+    const descNext = sc.next?.help || '继续';
+    const descChoose = sc.choose?.help || '选择选项';
+    const descStat = sc.stat?.help || '查看状态';
+    const descLoad = sc.load?.help || '读取存档';
+    const descReset = sc.reset?.help || '重置故事';
+    const descClear = sc.clear?.help || '清除数据';
+
+    return `${settings.pluginName} Story:\n.${settings.commandName} ${cmdStart} - ${descStart}\n.${settings.commandName} ${cmdNext} - ${descNext}\n.${settings.commandName} ${cmdChoose} <index> - ${descChoose}\n.${settings.commandName} ${cmdStat} - ${descStat}\n.${settings.commandName} ${cmdLoad} <id> - ${descLoad}\n.${settings.commandName} ${cmdReset} - ${descReset}\n.${settings.commandName} ${cmdClear} - ${descClear}`;
+  })();
   
   // Undo/Redo Stacks
   const [history, setHistory] = useState<{nodes: AppNode[], edges: any[]}[]>([]);
@@ -213,6 +234,23 @@ export default function Editor() {
     };
     reader.readAsText(file);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleLoadExample = async () => {
+    try {
+      const url = new URL('example_complex.json', window.location.href).toString();
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) throw new Error('示例文件不是 JSON（可能路径错误）');
+      const data = await res.json();
+      pushHistory();
+      setNodes(data.nodes);
+      setEdges(data.edges);
+      setSettings(data.settings);
+    } catch (err: any) {
+      alert('加载示例失败: ' + (err?.message ?? String(err)));
+    }
   };
 
   const addAction = (nodeId: string) => {
@@ -395,17 +433,7 @@ export default function Editor() {
             </button>
             <button
               className="flex items-center gap-1 px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs md:text-sm whitespace-nowrap"
-              onClick={() => {
-                  fetch('/example_complex.json')
-                      .then(res => res.json())
-                      .then(data => {
-                          pushHistory();
-                          setNodes(data.nodes);
-                          setEdges(data.edges);
-                          setSettings(data.settings);
-                      })
-                      .catch(err => alert('加载示例失败: ' + err));
-              }}
+              onClick={handleLoadExample}
             >
               <Upload size={14} className="md:w-4 md:h-4" /> <span className="hidden md:inline">示例</span>
             </button>
@@ -500,12 +528,11 @@ export default function Editor() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">指令帮助 (Help)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">指令帮助预览 (Help)</label>
                   <textarea
                     className="w-full border rounded p-2 focus:ring-2 focus:ring-blue-500 outline-none transition-all h-20 text-xs font-mono"
-                    placeholder="自定义 .help 输出内容..."
-                    value={settings.commandHelp || ''}
-                    onChange={(e) => setSettings({ ...settings, commandHelp: e.target.value })}
+                    value={commandHelpPreview}
+                    readOnly
                   />
                 </div>
 
