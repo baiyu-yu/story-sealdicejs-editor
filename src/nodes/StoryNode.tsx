@@ -31,6 +31,12 @@ const StoryNodeComponent = ({ data, isConnectable }: NodeProps) => {
           {nodeData.text || '暂无内容...'}
         </div>
         
+        {nodeData.savePointId && (
+          <div className="text-[10px] bg-purple-100 text-purple-800 px-1 rounded flex items-center gap-1 mt-1">
+            <span>💾 存档点: {nodeData.savePointId}</span>
+          </div>
+        )}
+        
         {hasActions && (
           <div className="mt-1 pt-1 border-t border-gray-100 flex flex-col gap-1">
              <div className="text-[10px] text-gray-400 font-bold">结算效果:</div>

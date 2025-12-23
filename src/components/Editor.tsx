@@ -461,7 +461,7 @@ export default function Editor() {
             </div>
 
             {/* Mobile-only Groups (Hidden on Desktop) */}
-            <div className="flex md:hidden items-center gap-1">
+            <div className="flex md:hidden items-center gap-1 flex-wrap">
                 <div className="w-px h-4 bg-gray-300 mx-0.5 flex-shrink-0"></div>
                 {/* Edit Group Mobile */}
                 <button
@@ -526,7 +526,19 @@ export default function Editor() {
                     className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs whitespace-nowrap"
                     onClick={handleDownloadPlugin}
                 >
-                    <Download size={14} />
+                    <Download size={14} /> <span className="inline">生成</span>
+                </button>
+                 <button
+                    className="flex items-center gap-1 px-2 py-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 text-xs whitespace-nowrap"
+                    onClick={handleLoadExample}
+                >
+                    <Upload size={14} /> <span className="inline">示例</span>
+                </button>
+                <button
+                    className="flex items-center gap-1 px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-xs whitespace-nowrap"
+                    onClick={() => fileInputRef.current?.click()}
+                >
+                    <Upload size={14} /> <span className="inline">读取</span>
                 </button>
             </div>
           </Panel>

@@ -221,19 +221,36 @@ function main() {
         seal.replyToSender(ctx, msg, output);
         return seal.ext.newCmdExecuteResult(true);
     } else if (subCmd === SC_LOAD) {
-        const pointId = cmdArgs.getArgN(2);
+        let pointId = cmdArgs.getArgN(2);
+        
         if (!pointId) {
-             seal.replyToSender(ctx, msg, \`请输入存档点ID: .\${CMD_NAME} \${SC_LOAD} <id>\`);
+             const savePoints = state.savePoints || {};
+             const keys = Object.keys(savePoints);
+             if (keys.length === 0) {
+                 seal.replyToSender(ctx, msg, '当前没有可用存档点。');
+             } else {
+                 let output = '可用存档点:\\n';
+                 keys.forEach(k => {
+                     // Optionally include timestamp or location name if stored
+                     output += \`- \${k}\\n\`;
+                 });
+                 output += \`\\n使用 .\${CMD_NAME} \${SC_LOAD} <id> 读取\`;
+                 seal.replyToSender(ctx, msg, output);
+             }
              return seal.ext.newCmdExecuteResult(true);
         }
+
         if (state.savePoints && state.savePoints[pointId]) {
-             // Restore state but keep savePoints
              const saved = state.savePoints[pointId];
              const currentSavePoints = state.savePoints;
+             
              state = JSON.parse(JSON.stringify(saved));
+             
              state.savePoints = currentSavePoints;
+             
              saveState(userId, state);
              seal.replyToSender(ctx, msg, \`已加载存档点: \${pointId}\`);
+
              processNode(ctx, msg, state);
         } else {
              seal.replyToSender(ctx, msg, \`未找到存档点: \${pointId}\`);
@@ -312,11 +329,13 @@ function main() {
     let node = STORY_DATA.nodes[nodeId];
     if (!node) return;
 
-    // 存档节点处理
+    // Check for Save Point
     if (node.savePointId) {
         state.savePoints = state.savePoints || {};
-        const { savePoints, ...rest } = state;
-        state.savePoints[node.savePointId] = rest;
+        // Save current state snapshot (excluding savePoints itself to avoid recursion/bloat)
+        const snapshot = JSON.parse(JSON.stringify(state));
+        delete snapshot.savePoints; // Don't nest savePoints
+        state.savePoints[node.savePointId] = snapshot;
         saveState(ctx.player.userId, state);
     }
 
@@ -398,6 +417,11 @@ function main() {
 
     let output = node.text || '';
     
+    // Add [Save Point] indicator if applicable
+    if (node.savePointId) {
+        output = \`💾 [存档点: \${node.savePointId}]\\n\` + output;
+    }
+
     if (node.choices) {
         output += '\\n\\n选项:';
         node.choices.forEach((c, i) => {
