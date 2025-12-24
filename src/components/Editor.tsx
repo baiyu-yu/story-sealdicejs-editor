@@ -82,6 +82,12 @@ export default function Editor() {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoAction = useRef(false);
 
+  // Initialize history with initial state
+  useEffect(() => {
+      setHistory([{ nodes: JSON.parse(JSON.stringify(INITIAL_NODES)), edges: [] }]);
+      setHistoryIndex(0);
+  }, []);
+
   // Save history on change
   useEffect(() => {
       if (isUndoRedoAction.current) {
@@ -95,6 +101,11 @@ export default function Editor() {
   
   const pushHistory = useCallback(() => {
       setHistory(prev => {
+          // If we're at the initial state (index 0), replace it with current state
+          if (historyIndex === 0) {
+              return [{ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }];
+          }
+          // Otherwise, truncate history after current index and add new state
           const newHistory = prev.slice(0, historyIndex + 1);
           newHistory.push({ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) });
           return newHistory;
@@ -132,8 +143,8 @@ export default function Editor() {
       };
     });
     
-    pushHistory();
     setNodes(layoutedNodes);
+    pushHistory();
     window.requestAnimationFrame(() => {
       fitView();
     });
@@ -516,6 +527,12 @@ export default function Editor() {
                 >
                     <Settings size={14} />
                 </button>
+                <button
+                    className="flex items-center gap-1 px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 text-xs whitespace-nowrap"
+                    onClick={() => setShowGuide(true)}
+                >
+                    <HelpCircle size={14} />
+                </button>
                  <button
                     className="flex items-center gap-1 px-2 py-1 bg-gray-600 text-white rounded hover:bg-gray-700 text-xs whitespace-nowrap"
                     onClick={handleSaveProject}
@@ -650,30 +667,53 @@ export default function Editor() {
       {/* Guide Modal */}
       {showGuide && (
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4">
-              <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+              <div className="bg-white p-4 sm:p-6 rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
                   <h2 className="text-xl font-bold mb-4 text-gray-800">欢迎使用 剧情小说海豹插件编辑器</h2>
                   <div className="space-y-4 text-sm text-gray-600">
-                      <p>这是一个可视化的 SealDice 跑团或剧情小说插件编辑器，您可以无需代码即可创作互动故事。</p>
+                      <p>这是一个可视化的 SealDice 跑团或剧情小说插件编辑器，您可以无需代码即可创作互动故事。支持桌面端和移动端操作，让您随时随地进行创作。</p>
                       
-                      <h3 className="font-bold text-gray-800 mt-4">快速上手：</h3>
+                      <h3 className="font-bold text-gray-800 mt-4">核心功能：</h3>
+                      <ul className="list-disc pl-5 space-y-2">
+                          <li><strong>可视化编辑</strong>：拖拽节点构建故事流程，无需编写代码。</li>
+                          <li><strong>实时预览</strong>：即时查看故事结构和连线关系。</li>
+                          <li><strong>一键导出</strong>：生成可直接使用的 SealDice 插件代码。</li>
+                          <li><strong>项目管理</strong>：保存、加载和分享您的故事项目。</li>
+                      </ul>
+
+                      <h3 className="font-bold text-gray-800 mt-4">节点类型：</h3>
                       <ul className="list-disc pl-5 space-y-2">
                           <li><strong>剧情节点</strong>：故事的基本单元，包含文本和可选的结算操作（获得物品/数值变更）。</li>
                           <li><strong>选项节点</strong>：提供分支选择，每个选项可以连接不同的后续剧情。</li>
                           <li><strong>判定节点</strong>：根据玩家属性或物品进行自动分歧（成功/失败）。</li>
-                          <li><strong>连线</strong>：拖动节点边缘的点点连接到另一个节点的点点。</li>
                       </ul>
 
-                      <h3 className="font-bold text-gray-800 mt-4">移动端操作提示：</h3>
+                      <h3 className="font-bold text-gray-800 mt-4">操作指南：</h3>
                       <ul className="list-disc pl-5 space-y-2">
-                          <li>使用双指进行缩放。</li>
-                          <li>单指拖动空白处移动画布。</li>
-                          <li>点击节点/连线进行编辑，编辑面板将从底部弹出。</li>
+                          <li><strong>添加节点</strong>：点击工具栏的"+"按钮，选择节点类型并放置在画布上。</li>
+                          <li><strong>连接节点</strong>：拖动节点边缘的连接点到另一个节点的连接点。</li>
+                          <li><strong>编辑节点</strong>：点击节点打开编辑面板，修改内容和属性。</li>
+                          <li><strong>删除元素</strong>：选中节点或连线后点击删除按钮，或按 Delete 键。</li>
                       </ul>
+
+                      <h3 className="font-bold text-gray-800 mt-4">工具栏功能：</h3>
+                      <ul className="list-disc pl-5 space-y-2">
+                          <li><strong>撤销/重做</strong>：支持多步撤销和重做操作。</li>
+                          <li><strong>保存/加载</strong>：将项目保存为JSON文件，或从文件加载项目。</li>
+                          <li><strong>导出插件</strong>：生成 SealDice 插件代码并下载。</li>
+                          <li><strong>布局调整</strong>：自动排列节点，优化故事结构显示。</li>
+                          <li><strong>设置</strong>：自定义插件名称、指令和子命令。</li>
+                      </ul>
+
+                      <div className="bg-blue-50 p-3 rounded border border-blue-200 mt-4">
+                          <p className="text-blue-800 text-xs">
+                              <strong>提示：</strong>建议使用电脑获得更好的编辑体验。
+                          </p>
+                      </div>
                   </div>
                   
-                  <div className="mt-8 flex justify-end">
+                  <div className="mt-6 flex justify-end">
                       <button
-                          className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md"
+                          className="px-4 sm:px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 shadow-md text-sm sm:text-base"
                           onClick={closeGuide}
                       >
                           开始创作

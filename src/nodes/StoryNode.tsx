@@ -16,12 +16,14 @@ const StoryNodeComponent = ({ data, isConnectable }: NodeProps) => {
 
   return (
     <div className={`bg-white border-2 rounded-md p-4 min-w-[200px] shadow-sm ${nodeData.isStart ? 'border-green-400 ring-2 ring-green-100' : 'border-gray-200'}`}>
-      <Handle
-        type="target"
-        position={Position.Top}
-        isConnectable={isConnectable}
-        className="w-3 h-3 bg-blue-500"
-      />
+      {!nodeData.isStart && (
+        <Handle
+          type="target"
+          position={Position.Top}
+          isConnectable={isConnectable}
+          className="w-3 h-3 bg-blue-500"
+        />
+      )}
       <div className="flex flex-col gap-2">
         <div className="font-bold text-sm text-gray-700 border-b pb-1 mb-1 flex justify-between">
           <span>{nodeData.label}</span>
