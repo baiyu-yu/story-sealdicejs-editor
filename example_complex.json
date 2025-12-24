@@ -137,6 +137,7 @@
       "position": { "x": 250, "y": 650 },
       "data": { 
         "label": "阅读纸条", 
+        "savePointId": "note_checkpoint",
         "text": "你借着烛光阅读纸条：'午夜十二点，带上朗姆酒。'", 
         "choices": [
             { "id": "c1", "text": "前往西海岸" },
@@ -151,6 +152,75 @@
       "data": { 
         "label": "西海岸", 
         "text": "海浪拍打着礁石。你等到了午夜，一艘泛着绿光的破船缓缓浮出水面..."
+      }
+    },
+    {
+      "id": "ghost_ship_choice",
+      "type": "choice",
+      "position": { "x": 200, "y": 1050 },
+      "data": {
+        "label": "幽灵船",
+        "text": "雾气越来越浓，那艘泛着绿光的破船静静停在近岸。你要怎么做？",
+        "choices": [
+          { "id": "b1", "text": "登船调查" },
+          { "id": "b2", "text": "先回灯塔观察" }
+        ]
+      }
+    },
+    {
+      "id": "watch_lighthouse",
+      "type": "story",
+      "position": { "x": 380, "y": 1250 },
+      "data": {
+        "label": "灯塔观察",
+        "text": "你躲在灯塔阴影里观察良久，确认附近没人注意你。\n(知识 +1)",
+        "actions": [
+          { "type": "stat", "target": "knowledge", "operation": "+", "value": 1 }
+        ]
+      }
+    },
+    {
+      "id": "board_ship",
+      "type": "story",
+      "position": { "x": 40, "y": 1250 },
+      "data": {
+        "label": "登船",
+        "savePointId": "board_ship_checkpoint",
+        "text": "你踩上甲板，湿冷的木板发出吱呀声。\n你隐约听见船舱深处传来锁链摩擦的声音……"
+      }
+    },
+    {
+      "id": "below_deck",
+      "type": "choice",
+      "position": { "x": 40, "y": 1450 },
+      "data": {
+        "label": "甲板深处",
+        "text": "船舱口黑得像一张嘴，冷风从里面往外冒。你要？",
+        "choices": [
+          { "id": "d1", "text": "下到船舱" },
+          { "id": "d2", "text": "就此离开海岸" }
+        ]
+      }
+    },
+    {
+      "id": "treasure",
+      "type": "story",
+      "position": { "x": -120, "y": 1650 },
+      "data": {
+        "label": "船舱宝藏",
+        "text": "你在船舱深处找到一个生锈的箱子。打开后，里面是沉甸甸的古金币。\n(获得 古金币 x10)",
+        "actions": [
+          { "type": "item", "target": "古金币", "operation": "+", "value": 10 }
+        ]
+      }
+    },
+    {
+      "id": "leave_sea",
+      "type": "story",
+      "position": { "x": 200, "y": 1650 },
+      "data": {
+        "label": "离开海岸",
+        "text": "你决定见好就收。等雾散一些再回来，也许会更安全。"
       }
     },
     {
@@ -175,6 +245,13 @@
     { "id": "e8", "source": "rumor", "target": "read_note", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e9", "source": "read_note", "sourceHandle": "c1", "target": "coast", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e10", "source": "read_note", "sourceHandle": "c2", "target": "throw_note", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e11", "source": "coast", "target": "ghost_ship_choice", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e12", "source": "ghost_ship_choice", "sourceHandle": "b1", "target": "board_ship", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e13", "source": "ghost_ship_choice", "sourceHandle": "b2", "target": "watch_lighthouse", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e14", "source": "watch_lighthouse", "target": "board_ship", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e15", "source": "board_ship", "target": "below_deck", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e16", "source": "below_deck", "sourceHandle": "d1", "target": "treasure", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e17", "source": "below_deck", "sourceHandle": "d2", "target": "leave_sea", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e_steal_s", "source": "check_steal", "sourceHandle": "success", "target": "steal_success", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e_steal_f", "source": "check_steal", "sourceHandle": "failure", "target": "steal_fail", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e_steal_gs", "source": "check_steal", "sourceHandle": "great_success", "target": "steal_success", "markerEnd": { "type": "arrowclosed" } },
