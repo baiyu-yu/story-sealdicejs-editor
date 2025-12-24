@@ -125,6 +125,24 @@ function main() {
   const CRITICAL_FAILURE_MODE = '__CRITICAL_FAILURE_MODE__';
   const DEFAULT_DICE = '__DEFAULT_DICE__';
 
+  function replyToSender (ctx, msg, text) {
+    const raw = text == null ? '' : String(text);
+    const parts = raw.split('\\f');
+
+    if (parts.length <= 1) {
+      return seal.replyToSender(ctx, msg, raw);
+    }
+
+    let idx = 0;
+    for (const part of parts) {
+      if (!part || part.trim() === '') continue;
+      const delay = idx * 200; // 整0.2秒延迟，应该不会乱序吧？乱序就调大一点
+      idx += 1;
+      if (delay === 0) seal.replyToSender(ctx, msg, part);
+      else setTimeout(() => seal.replyToSender(ctx, msg, part), delay);
+    }
+  };
+
   // 掷骰表达式解析
   const rollDice = (expr) => {
       if (typeof expr === 'number') return expr;
@@ -177,7 +195,7 @@ function main() {
 
     if (subCmd === SC_CLEAR || subCmd === 'clr') {
         ext.storageSet(\`user_\${userId}\`, '');
-        seal.replyToSender(ctx, msg, '个人数据已清除。');
+        replyToSender(ctx, msg, '个人数据已清除。');
         return seal.ext.newCmdExecuteResult(true);
     }
 
@@ -193,7 +211,7 @@ function main() {
 
     if (subCmd === SC_RESET) {
         state = resetState(userId);
-        seal.replyToSender(ctx, msg, '故事已重置。');
+        replyToSender(ctx, msg, '故事已重置。');
         return seal.ext.newCmdExecuteResult(true);
     } else if (subCmd === SC_STAT) {
         const stats = state.stats || {};
@@ -217,7 +235,7 @@ function main() {
                 }
             }
         }
-        seal.replyToSender(ctx, msg, output);
+        replyToSender(ctx, msg, output);
         return seal.ext.newCmdExecuteResult(true);
     } else if (subCmd === SC_LOAD) {
         let pointId = cmdArgs.getArgN(2);
@@ -226,14 +244,14 @@ function main() {
              const savePoints = state.savePoints || {};
              const keys = Object.keys(savePoints);
              if (keys.length === 0) {
-                 seal.replyToSender(ctx, msg, '当前没有可用存档点。');
+                 replyToSender(ctx, msg, '当前没有可用存档点。');
              } else {
                  let output = '可用存档点:\\n';
                  keys.forEach(k => {
                      output += \`- \${k}\\n\`;
                  });
                  output += \`\\n使用 .\${CMD_NAME} \${SC_LOAD} <id> 读取\`;
-                 seal.replyToSender(ctx, msg, output);
+                 replyToSender(ctx, msg, output);
              }
              return seal.ext.newCmdExecuteResult(true);
         }
@@ -247,35 +265,35 @@ function main() {
              state.savePoints = currentSavePoints;
              
              saveState(userId, state);
-             seal.replyToSender(ctx, msg, \`已加载存档点: \${pointId}\`);
+             replyToSender(ctx, msg, \`已加载存档点: \${pointId}\`);
 
              processNode(ctx, msg, state);
         } else {
-             seal.replyToSender(ctx, msg, \`未找到存档点: \${pointId}\`);
+             replyToSender(ctx, msg, \`未找到存档点: \${pointId}\`);
         }
         return seal.ext.newCmdExecuteResult(true);
     }
 
     if (!STORY_DATA.nodes[state.currentNodeId]) {
-      seal.replyToSender(ctx, msg, 'Error: 找不到当前节点信息，请尝试重置。');
+      replyToSender(ctx, msg, 'Error: 找不到当前节点信息，请尝试重置。');
       return seal.ext.newCmdExecuteResult(true);
     }
 
     // 选择节点处理
       if (subCmd === SC_CHOOSE) {
         if (state.isEnded) {
-             seal.replyToSender(ctx, msg, \`故事已结束。回复 .\${CMD_NAME} \${SC_START} 重新开始。\`);
+             replyToSender(ctx, msg, \`故事已结束。回复 .\${CMD_NAME} \${SC_START} 重新开始。\`);
              return seal.ext.newCmdExecuteResult(true);
         }
         const currentNode = STORY_DATA.nodes[state.currentNodeId];
       if (!currentNode.choices) {
-        seal.replyToSender(ctx, msg, \`当前无需选择，请使用 .\${CMD_NAME} \${SC_NEXT} 继续\\n(回复 .\${CMD_NAME} help 查看帮助)\`);
+        replyToSender(ctx, msg, \`当前无需选择，请使用 .\${CMD_NAME} \${SC_NEXT} 继续\\n(回复 .\${CMD_NAME} help 查看帮助)\`);
         return seal.ext.newCmdExecuteResult(true);
       }
         const choiceIdx = parseInt(cmdArgs.getArgN(2)) - 1;
         const choice = currentNode.choices[choiceIdx];
         if (!choice) {
-          seal.replyToSender(ctx, msg, '无效的选项。');
+          replyToSender(ctx, msg, '无效的选项。');
           return seal.ext.newCmdExecuteResult(true);
         }
         
@@ -284,7 +302,7 @@ function main() {
                 new Function('state', 'seal', 'ctx', 'rollDice', choice.script)(state, seal, ctx, rollDice);
             } catch (e) {
                 console.error('Choice Script error:', e);
-                seal.replyToSender(ctx, msg, \`Choice Error: \${e.message}\`);
+                replyToSender(ctx, msg, \`Choice Error: \${e.message}\`);
             }
         }
 
@@ -298,13 +316,13 @@ function main() {
     // 继续命令处理
     if (subCmd === SC_NEXT) {
         if (state.isEnded) {
-             seal.replyToSender(ctx, msg, \`故事已结束。回复 .\${CMD_NAME} \${SC_START} 重新开始。\`);
+             replyToSender(ctx, msg, \`故事已结束。回复 .\${CMD_NAME} \${SC_START} 重新开始。\`);
              return seal.ext.newCmdExecuteResult(true);
         }
         const currentNode = STORY_DATA.nodes[state.currentNodeId];
         
         if (currentNode.choices) {
-             seal.replyToSender(ctx, msg, \`请先做出选择: .\${CMD_NAME} \${SC_CHOOSE} <序号>\\n(回复 .\${CMD_NAME} help 查看帮助)\`);
+             replyToSender(ctx, msg, \`请先做出选择: .\${CMD_NAME} \${SC_CHOOSE} <序号>\\n(回复 .\${CMD_NAME} help 查看帮助)\`);
              return seal.ext.newCmdExecuteResult(true);
         }
         
@@ -313,12 +331,12 @@ function main() {
             saveState(userId, state);
             processNode(ctx, msg, state);
         } else {
-            seal.replyToSender(ctx, msg, currentNode.text + '\\n(故事结束)');
+            replyToSender(ctx, msg, currentNode.text + '\\n(故事结束)');
         }
         return seal.ext.newCmdExecuteResult(true);
     }
     
-    seal.replyToSender(ctx, msg, cmd.help);
+    replyToSender(ctx, msg, cmd.help);
     return seal.ext.newCmdExecuteResult(true);
   };
 
@@ -342,7 +360,7 @@ function main() {
             saveState(ctx.player.userId, state); 
         } catch (e) {
             console.error('Script error:', e);
-            seal.replyToSender(ctx, msg, \`Script Error: \${e.message}\`);
+            replyToSender(ctx, msg, \`Script Error: \${e.message}\`);
         }
     }
 
@@ -379,14 +397,14 @@ function main() {
         }
 
         const output = \`检定 \${node.checkTarget} (\${targetVal})\\n结果: \${roll} / \${dice} -> \${result}\`;
-        seal.replyToSender(ctx, msg, output);
+        replyToSender(ctx, msg, output);
 
         if (nextId) {
             state.currentNodeId = nextId;
             saveState(ctx.player.userId, state);
             setTimeout(() => processNode(ctx, msg, state), 500); // Small delay for dramatic effect
         } else {
-            seal.replyToSender(ctx, msg, '(错误: 检定后无路可走)');
+            replyToSender(ctx, msg, '(错误: 检定后无路可走)');
         }
         return;
     }
@@ -406,7 +424,7 @@ function main() {
             processNode(ctx, msg, state);
             return;
         } else {
-             seal.replyToSender(ctx, msg, \`(逻辑判定结束: \${conditionResult ? 'True' : 'False'} - 无后续节点)\`);
+             replyToSender(ctx, msg, \`(逻辑判定结束: \${conditionResult ? 'True' : 'False'} - 无后续节点)\`);
              return;
         }
     }
@@ -441,7 +459,7 @@ function main() {
              saveState(ctx.player.userId, state);
              processNode(ctx, msg, state); 
         } else {
-             seal.replyToSender(ctx, msg, '(错误: 随机分支计算失败)');
+             replyToSender(ctx, msg, '(错误: 随机分支计算失败)');
         }
         return; 
     } else if (node.next) {
@@ -453,7 +471,7 @@ function main() {
     }
 
     if (output.trim()) {
-        seal.replyToSender(ctx, msg, output);
+        replyToSender(ctx, msg, output);
     }
   }
 
