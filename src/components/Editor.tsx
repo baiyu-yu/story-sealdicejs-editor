@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -398,12 +398,43 @@ export default function Editor() {
 
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
 
+  const displayedEdges = useMemo(() => {
+    if (!selectedNodeId) return edges;
+
+    return edges.map((edge: any) => {
+      const isConnected = edge.source === selectedNodeId || edge.target === selectedNodeId;
+      const baseStyle = edge.style ?? {};
+
+      if (isConnected) {
+        return {
+          ...edge,
+          style: {
+            ...baseStyle,
+            stroke: '#6366f1',
+            strokeWidth: 2.5,
+            opacity: 1,
+          },
+          zIndex: 10,
+        };
+      }
+
+      return {
+        ...edge,
+        style: {
+          ...baseStyle,
+          opacity: 0.2,
+        },
+        zIndex: 0,
+      };
+    });
+  }, [edges, selectedNodeId]);
+
   return (
     <div className="flex flex-col md:flex-row w-full h-full">
       <div className="flex-1 h-full relative order-1">
         <ReactFlow
           nodes={nodes}
-          edges={edges}
+          edges={displayedEdges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onConnect={onConnect}
