@@ -200,9 +200,12 @@ function main() {
   const CRITICAL_FAILURE_MODE = '__CRITICAL_FAILURE_MODE__';
   const DEFAULT_DICE = '__DEFAULT_DICE__';
 
+  // 处理一下有换行符的情况
   function replyToSender (ctx, msg, text) {
     const raw = text == null ? '' : String(text);
-    const parts = raw.split('\\f');
+    const FF = String.fromCharCode(12);
+    const normalized = raw.split('\\\\f').join(FF).split('\\f').join(FF);
+    const parts = normalized.split(FF);  // 可恶啊转义
 
     if (parts.length <= 1) {
       return seal.replyToSender(ctx, msg, raw);
