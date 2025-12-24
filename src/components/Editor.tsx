@@ -685,6 +685,7 @@ export default function Editor() {
                           <li><strong>剧情节点</strong>：故事的基本单元，包含文本和可选的结算操作（获得物品/数值变更）。</li>
                           <li><strong>选项节点</strong>：提供分支选择，每个选项可以连接不同的后续剧情。</li>
                           <li><strong>判定节点</strong>：根据玩家属性或物品进行自动分歧（成功/失败）。</li>
+                          <li>节点若填写了存档ID，就可以在游戏中通过load命令回复到该存档点</li>
                       </ul>
 
                       <h3 className="font-bold text-gray-800 mt-4">操作指南：</h3>
