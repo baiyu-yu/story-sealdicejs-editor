@@ -19,9 +19,59 @@ import StoryNodeComponent from '../nodes/StoryNode';
 import ChoiceNodeComponent from '../nodes/ChoiceNode';
 import ConditionNodeComponent from '../nodes/ConditionNode';
 import { generatePlugin } from '../utils/generator';
+import { validateValueExpression } from '../utils/validation';
 import { ActionItem, AppNode, ConditionItem, ProjectSettings } from '../types';
 
 const SUBCOMMAND_KEYS = ['start', 'next', 'choose', 'stat', 'load', 'reset', 'clear'] as const;
+
+// 数值/掷骰表达式输入框（有验证的区分一下）
+interface ValueInputProps {
+  value: any;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  className?: string;
+}
+
+const ValueInput: React.FC<ValueInputProps> = ({ value, onChange, placeholder, className }) => {
+  const [localValue, setLocalValue] = useState(String(value ?? ''));
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setLocalValue(String(value ?? ''));
+  }, [value]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setLocalValue(newValue);
+
+    const validation = validateValueExpression(newValue);
+    if (validation.valid) {
+      setError(null);
+      onChange(newValue);
+    } else {
+      setError(validation.error || '无效输入');
+      onChange(newValue);
+    }
+  };
+
+  return (
+    <div className="relative">
+      <input
+        type="text"
+        className={`${className} ${error ? 'border-red-500 bg-red-50' : ''}`}
+        placeholder={placeholder}
+        value={localValue}
+        onChange={handleChange}
+      />
+      {error && (
+        <div className="absolute left-0 top-full mt-0.5 text-[10px] text-red-500 whitespace-nowrap z-10">
+          {error}
+        </div>
+      )}
+    </div>
+  );
+};
+
 const nodeTypes: NodeTypes = {
   story: StoryNodeComponent,
   choice: ChoiceNodeComponent,
@@ -88,24 +138,19 @@ export default function Editor() {
       setHistoryIndex(0);
   }, []);
 
-  // Save history on change
   useEffect(() => {
       if (isUndoRedoAction.current) {
           isUndoRedoAction.current = false;
           return;
       }
       
-      // We don't automatically push history here anymore to avoid spam
-      // But we keep this effect for potential future use or debugging
-  }, [nodes, edges]); // We actually need to trigger this manually on specific actions for better performance
+  }, [nodes, edges]);
   
   const pushHistory = useCallback(() => {
       setHistory(prev => {
-          // If we're at the initial state (index 0), replace it with current state
           if (historyIndex === 0) {
               return [{ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) }];
           }
-          // Otherwise, truncate history after current index and add new state
           const newHistory = prev.slice(0, historyIndex + 1);
           newHistory.push({ nodes: JSON.parse(JSON.stringify(nodes)), edges: JSON.parse(JSON.stringify(edges)) });
           return newHistory;
@@ -154,35 +199,21 @@ export default function Editor() {
     const newMode = !isTreeMode;
     setIsTreeMode(newMode);
     
-    // Update draggable state
     setNodes((nds) => nds.map((node) => ({
         ...node,
         draggable: !newMode,
     })));
     
-    // Update edges type
     setEdges((eds) => eds.map((edge) => ({
         ...edge,
         type: newMode ? 'smoothstep' : 'default',
     })));
 
-    // Auto-layout when switching to Tree Mode
     if (newMode) {
-        onLayout('LR'); // Left-to-Right for Mind Map style
+        onLayout('LR');
     }
   };
 
-  // Update draggable state when mode changes (Effect removed as we handle it in toggle)
-  /* 
-  useEffect(() => {
-      setNodes((nds) => nds.map((node) => ({
-          ...node,
-          draggable: !isTreeMode,
-      })));
-  }, [isTreeMode, setNodes]); 
-  */
-
-  // Initial history push
   useEffect(() => {
      if (history.length === 0 && nodes.length > 0) {
          setHistory([{ nodes, edges }]);
@@ -217,7 +248,7 @@ export default function Editor() {
 
   const onConnect = useCallback(
     (params: Connection) => {
-        pushHistory(); // Save state before connecting
+        pushHistory(); 
         setEdges((eds) => addEdge(params, eds));
     },
     [setEdges, pushHistory],
@@ -239,7 +270,7 @@ export default function Editor() {
   }, []);
 
   const addNode = (type: 'story' | 'choice' | 'condition') => {
-    pushHistory(); // Save history
+    pushHistory(); 
     const id = `${type}_${Date.now()}`;
     let data: any = {};
     if (type === 'story') {
@@ -260,10 +291,6 @@ export default function Editor() {
   };
 
   const updateNodeData = (id: string, newData: any) => {
-    // For text inputs, we might not want to push history on every keystroke. 
-    // Ideally we push on blur or use debounce. For simplicity in this demo, we won't push history here automatically.
-    // User can rely on manual saves or we can add a 'save snapshot' button if needed, 
-    // or wrap specific updates like add/remove action/choice in their own functions with history.
     setNodes((nds) =>
       nds.map((node) => {
         if (node.id === id) {
@@ -274,7 +301,7 @@ export default function Editor() {
     );
   };
   
-  // Wrap complex updates with history
+
   const updateNodeDataWithHistory = (id: string, newData: any) => {
       pushHistory();
       updateNodeData(id, newData);
@@ -349,10 +376,9 @@ export default function Editor() {
   };
 
   const updateAction = (nodeId: string, idx: number, field: string, value: any) => {
-    // No history push here to avoid spamming history on select/input change
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return;
-    
+
     const newActions = [...(node.data.actions || [])];
     newActions[idx] = { ...newActions[idx], [field]: value };
     updateNodeData(nodeId, { actions: newActions });
@@ -378,7 +404,6 @@ export default function Editor() {
   };
 
   const updateCondition = (nodeId: string, idx: number, field: string, value: any) => {
-    // No history push
     const node = nodes.find(n => n.id === nodeId);
     if (!node) return;
     
@@ -1124,20 +1149,18 @@ export default function Editor() {
                                 )}
                              </select>
                              {action.type === 'stat' ? (
-                                 <input 
-                                    type="text" 
+                                 <ValueInput
                                     className="border rounded text-xs p-1 w-20"
-                                    placeholder="值"
+                                    placeholder="值 (如 10 或 2d6)"
                                     value={action.value}
-                                    onChange={(e) => updateAction(selectedNode.id, idx, 'value', e.target.value)}
+                                    onChange={(v) => updateAction(selectedNode.id, idx, 'value', v)}
                                  />
                              ) : (
-                                 <input 
-                                    type="text" 
-                                    className="border rounded text-xs p-1 w-12"
+                                 <ValueInput
+                                    className="border rounded text-xs p-1 w-16"
                                     placeholder="数量"
                                     value={action.value || 1}
-                                    onChange={(e) => updateAction(selectedNode.id, idx, 'value', e.target.value)}
+                                    onChange={(v) => updateAction(selectedNode.id, idx, 'value', v)}
                                  />
                              )}
                         </div>
@@ -1367,14 +1390,14 @@ export default function Editor() {
                                   <option value="=">=</option>
                               </select>
                               {action.type === 'stat' && (
-                                  <input 
-                                      className="border rounded p-0.5 w-10"
+                                  <ValueInput
+                                      className="border rounded p-0.5 w-12"
                                       placeholder="值"
                                       value={action.value}
-                                      onChange={(e) => {
+                                      onChange={(v) => {
                                           const newChoices = [...(selectedNode.data.choices as any[])];
                                           const newActions = [...(newChoices[idx].actions || [])];
-                                          newActions[aIdx] = { ...newActions[aIdx], value: e.target.value };
+                                          newActions[aIdx] = { ...newActions[aIdx], value: v };
                                           newChoices[idx] = { ...newChoices[idx], actions: newActions };
                                           updateNodeData(selectedNode.id, { choices: newChoices });
                                       }}
