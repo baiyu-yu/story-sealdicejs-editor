@@ -1103,6 +1103,10 @@ export default function Editor() {
                 onChange={(e) => updateNodeData(selectedNode.id, { text: e.target.value })}
                 placeholder="在此输入故事内容..."
               />
+              <p className="text-xs text-gray-500 mt-1">
+                可插入变量：<code className="bg-gray-100 px-1 rounded">{'{$属性名}'}</code> 显示属性值，
+                <code className="bg-gray-100 px-1 rounded">{'{$物品:物品名}'}</code> 显示物品数量
+              </p>
             </div>
           )}
 
@@ -1443,6 +1447,9 @@ export default function Editor() {
             >
               + 添加选项
             </button>
+            <p className="text-xs text-gray-500 mt-2">
+              选项文本支持变量：<code className="bg-gray-100 px-1 rounded">{'{$属性名}'}</code>、<code className="bg-gray-100 px-1 rounded">{'{$物品:物品名}'}</code>
+            </p>
               </div>
             </div>
           )}

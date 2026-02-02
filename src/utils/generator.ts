@@ -146,6 +146,25 @@ function main() {
     }
   };
 
+  // 变量替换
+  const replaceVars = (text, state) => {
+    if (!text) return text;
+    return String(text).replace(/\\{\\$([^}]+)\\}/g, (match, key) => {
+      const trimmed = key.trim();
+      if (trimmed.startsWith('物品:') || trimmed.startsWith('item:')) {
+        const itemName = trimmed.replace(/^(物品:|item:)/, '').trim();
+        if (state.inventory && state.inventory[itemName] !== undefined) {
+          return state.inventory[itemName];
+        }
+        return '0';
+      }
+      if (state.stats && state.stats[trimmed] !== undefined) {
+        return state.stats[trimmed];
+      }
+      return match;
+    });
+  };
+
   // 掷骰表达式解析
   const rollDice = (expr) => {
       if (typeof expr === 'number') return expr;
@@ -432,8 +451,8 @@ function main() {
         }
     }
 
-    let output = node.text || '';
-    
+    let output = replaceVars(node.text || '', state);
+
     // Add [Save Point] indicator if applicable
     if (node.savePointId) {
         output = \`[存档点: \${node.savePointId}]\\n\` + output;
@@ -442,7 +461,7 @@ function main() {
     if (node.choices) {
         output += '\\n\\n选项:';
         node.choices.forEach((c, i) => {
-            output += \`\\n\${i + 1}. \${c.text}\`;
+            output += \`\\n\${i + 1}. \${replaceVars(c.text, state)}\`;
         });
         output += \`\\n(回复 .\${CMD_NAME} \${SC_CHOOSE} <序号>)\`;
     } else if (node.randomNext) {
