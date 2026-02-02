@@ -4,14 +4,18 @@
       "id": "start",
       "type": "story",
       "position": { "x": 250, "y": 50 },
-      "data": { 
-        "label": "酒馆入口", 
-        "text": "你推开‘黑鱼酒馆’沉重的橡木门。屋内喧闹的声音扑面而来，空气中弥漫着麦芽酒和烤肉的香气。\n老板擦着杯子看向你：“哟，新面孔？想来点什么？”", 
+      "data": {
+        "label": "酒馆入口",
+        "text": "你推开'黑鱼酒馆'沉重的橡木门。屋内喧闹的声音扑面而来，空气中弥漫着麦芽酒和烤肉的香气。\f老板擦着杯子看向你：\"哟，新面孔？想来点什么？\"",
         "isStart": true,
         "actions": [
             { "type": "stat", "target": "gold", "operation": "=", "value": 50 },
             { "type": "stat", "target": "hp", "operation": "=", "value": 100 },
-            { "type": "stat", "target": "dex", "operation": "=", "value": 60 }
+            { "type": "stat", "target": "maxHp", "operation": "=", "value": 100 },
+            { "type": "stat", "target": "dex", "operation": "=", "value": 60 },
+            { "type": "stat", "target": "str", "operation": "=", "value": 55 },
+            { "type": "stat", "target": "knowledge", "operation": "=", "value": 0 },
+            { "type": "stat", "target": "reputation", "operation": "=", "value": 0 }
         ]
       }
     },
@@ -19,12 +23,12 @@
       "id": "choice_bar",
       "type": "choice",
       "position": { "x": 250, "y": 250 },
-      "data": { 
-        "label": "回应老板", 
-        "text": "你的口袋里有50枚金币。", 
+      "data": {
+        "label": "回应老板",
+        "text": "你的口袋里有 {$gold} 枚金币。\n当前生命值：{$hp}/{$maxHp}",
         "choices": [
           { "id": "opt1", "text": "来一杯招牌黑啤 (5金币)", "actions": [{ "type": "stat", "target": "gold", "operation": "-", "value": 5 }] },
-          { "id": "opt2", "text": "打听关于‘幽灵船’的消息", "actions": [] },
+          { "id": "opt2", "text": "打听关于'幽灵船'的消息", "actions": [] },
           { "id": "opt4", "text": "试图偷取柜台上的藏宝图 (敏捷检定)", "actions": [] },
           { "id": "opt3", "text": "转身离开", "actions": [] }
         ]
@@ -34,12 +38,12 @@
       "id": "drink_beer",
       "type": "story",
       "position": { "x": 0, "y": 450 },
-      "data": { 
-        "label": "喝酒", 
-        "text": "冰凉的啤酒顺喉而下，你的疲惫感消散了不少。\n(HP +1d10, 获得2个空酒杯)",
+      "data": {
+        "label": "喝酒",
+        "text": "冰凉的啤酒顺喉而下，你的疲惫感消散了不少。\f你花费了5金币，剩余 {$gold} 金币。\n(HP +1d10, 获得1个空酒杯)",
         "actions": [
             { "type": "stat", "target": "hp", "operation": "+", "value": "1d10" },
-            { "type": "item", "target": "空酒杯", "operation": "+", "value": "2" }
+            { "type": "item", "target": "空酒杯", "operation": "+", "value": "1" }
         ]
       }
     },
@@ -47,9 +51,9 @@
       "id": "rumor",
       "type": "story",
       "position": { "x": 250, "y": 450 },
-      "data": { 
-        "label": "打听消息", 
-        "text": "老板压低了声音：“嘘……那可不是什么好话题。不过看你面善，我只能告诉你，每逢月圆之夜，西海岸的灯塔下……”\n他塞给你一张皱巴巴的纸条。",
+      "data": {
+        "label": "打听消息",
+        "text": "老板压低了声音：\"嘘……那可不是什么好话题。不过看你面善，我只能告诉你，每逢月圆之夜，西海岸的灯塔下……\"\f他塞给你一张皱巴巴的纸条。\n(获得神秘纸条，知识 +1)",
         "actions": [
             { "type": "item", "target": "神秘纸条", "operation": "+" },
             { "type": "stat", "target": "knowledge", "operation": "+", "value": 1 }
@@ -73,9 +77,23 @@
       "position": { "x": 400, "y": 650 },
       "data": {
           "label": "偷窃成功",
-          "text": "你趁老板不注意，手疾眼快地将藏宝图塞进了袖子里。\n(获得 藏宝图)",
+          "text": "你趁老板不注意，手疾眼快地将藏宝图塞进了袖子里。\f(获得 藏宝图)",
           "actions": [
               { "type": "item", "target": "藏宝图", "operation": "+", "value": 1 }
+          ]
+      }
+    },
+    {
+      "id": "steal_great_success",
+      "type": "story",
+      "position": { "x": 300, "y": 750 },
+      "data": {
+          "label": "偷窃大成功",
+          "text": "你的动作如行云流水般优雅！不仅拿到了藏宝图，还顺手'借'走了柜台下的钱袋。\f老板对此毫无察觉。\n(获得 藏宝图，金币 +20，声望 +5)",
+          "actions": [
+              { "type": "item", "target": "藏宝图", "operation": "+", "value": 1 },
+              { "type": "stat", "target": "gold", "operation": "+", "value": 20 },
+              { "type": "stat", "target": "reputation", "operation": "+", "value": 5 }
           ]
       }
     },
@@ -85,9 +103,24 @@
       "position": { "x": 600, "y": 650 },
       "data": {
           "label": "偷窃失败",
-          "text": "“嘿！你在干什么！”老板一把抓住了你的手腕，周围的酒客纷纷围了上来。\n你被痛扁了一顿并扔出了酒馆。\n(HP -20)",
+          "text": "\"嘿！你在干什么！\"老板一把抓住了你的手腕，周围的酒客纷纷围了上来。\f你被痛扁了一顿并扔出了酒馆。\n(HP -20，声望 -10)",
           "actions": [
-              { "type": "stat", "target": "hp", "operation": "-", "value": 20 }
+              { "type": "stat", "target": "hp", "operation": "-", "value": 20 },
+              { "type": "stat", "target": "reputation", "operation": "-", "value": 10 }
+          ]
+      }
+    },
+    {
+      "id": "steal_great_fail",
+      "type": "story",
+      "position": { "x": 700, "y": 750 },
+      "data": {
+          "label": "偷窃大失败",
+          "text": "你伸手去拿藏宝图，却不小心打翻了一整排酒瓶！\f\"抓小偷！\"老板大喊。\f愤怒的酒客们蜂拥而上，你被打得鼻青脸肿，还被迫赔偿了酒钱。\n(HP -30，金币 -20，声望 -20)",
+          "actions": [
+              { "type": "stat", "target": "hp", "operation": "-", "value": 30 },
+              { "type": "stat", "target": "gold", "operation": "-", "value": 20 },
+              { "type": "stat", "target": "reputation", "operation": "-", "value": 20 }
           ]
       }
     },
@@ -95,9 +128,9 @@
       "id": "leave",
       "type": "story",
       "position": { "x": 750, "y": 450 },
-      "data": { 
-        "label": "离开", 
-        "text": "你觉得这里太吵闹，转身走回了夜色中。\n你的冒险还没开始就结束了。",
+      "data": {
+        "label": "离开结局",
+        "text": "你觉得这里太吵闹，转身走回了夜色中。\\f街道上寒风刺骨，你裹紧了衣领。也许今天不是冒险的好日子……\\n\\n【离开结局】你的冒险还没开始就结束了。\\n\\n最终状态：\\n金币：{$gold}",
         "actions": []
       }
     },
@@ -105,8 +138,8 @@
       "id": "drunk_event",
       "type": "condition",
       "position": { "x": 0, "y": 650 },
-      "data": { 
-        "label": "是否喝醉", 
+      "data": {
+        "label": "是否喝醉",
         "conditions": [
             { "type": "stat", "target": "hp", "operation": ">", "value": 105 }
         ],
@@ -117,28 +150,174 @@
       "id": "drunk_fight",
       "type": "story",
       "position": { "x": -150, "y": 850 },
-      "data": { 
-        "label": "酒后闹事", 
-        "text": "你喝得太嗨了，不小心撞到了旁边的大汉。一场混战在所难免！\n(进入战斗分支 - 未完待续)"
+      "data": {
+        "label": "酒后闹事",
+        "text": "你喝得太嗨了，不小心撞到了旁边的大汉。\f\"找死吗？\"大汉一把揪住你的衣领。\n一场混战在所难免！",
+        "savePointId": "before_fight"
+      }
+    },
+    {
+      "id": "fight_choice",
+      "type": "choice",
+      "position": { "x": -150, "y": 1050 },
+      "data": {
+        "label": "应对大汉",
+        "text": "大汉虎视眈眈地看着你。你现在的生命值是 {$hp}。",
+        "choices": [
+          { "id": "fight1", "text": "挥拳反击！(力量检定)", "actions": [] },
+          { "id": "fight2", "text": "灵巧地躲避并逃跑(敏捷检定)", "actions": [] },
+          { "id": "fight3", "text": "赔礼道歉", "actions": [{ "type": "stat", "target": "gold", "operation": "-", "value": 10 }] }
+        ]
+      }
+    },
+    {
+      "id": "check_punch",
+      "type": "condition",
+      "position": { "x": -300, "y": 1250 },
+      "data": {
+        "label": "力量检定",
+        "conditionMode": "check",
+        "checkTarget": "str",
+        "checkDice": "1d100"
+      }
+    },
+    {
+      "id": "punch_success",
+      "type": "story",
+      "position": { "x": -400, "y": 1450 },
+      "data": {
+        "label": "击倒大汉",
+        "text": "你一拳打在大汉脸上，他应声倒地！\f酒馆里响起一阵叫好声。\n(声望 +10，获得\"黑鱼斗士\"称号)",
+        "actions": [
+          { "type": "stat", "target": "reputation", "operation": "+", "value": 10 },
+          { "type": "item", "target": "黑鱼斗士称号", "operation": "+" }
+        ]
+      }
+    },
+    {
+      "id": "punch_fail",
+      "type": "story",
+      "position": { "x": -200, "y": 1450 },
+      "data": {
+        "label": "被揍一顿",
+        "text": "你挥拳落空，大汉趁机给了你一记重击！\f周围的酒客哄堂大笑。\n(HP -15)",
+        "actions": [
+          { "type": "stat", "target": "hp", "operation": "-", "value": 15 }
+        ]
+      }
+    },
+    {
+      "id": "check_dodge",
+      "type": "condition",
+      "position": { "x": -100, "y": 1250 },
+      "data": {
+        "label": "敏捷检定",
+        "conditionMode": "check",
+        "checkTarget": "dex",
+        "checkDice": "1d100"
+      }
+    },
+    {
+      "id": "dodge_success",
+      "type": "story",
+      "position": { "x": -50, "y": 1450 },
+      "data": {
+        "label": "成功逃脱",
+        "text": "你灵活地躲过大汉的拳头，趁乱溜出了酒馆。\f\"懦夫！\"身后传来嘲笑声。\n(声望 -5)",
+        "actions": [
+          { "type": "stat", "target": "reputation", "operation": "-", "value": 5 }
+        ]
+      }
+    },
+    {
+      "id": "dodge_fail",
+      "type": "story",
+      "position": { "x": 50, "y": 1550 },
+      "data": {
+        "label": "逃跑失败",
+        "text": "你试图逃跑，但脚下一滑摔倒在地。\f大汉毫不客气地踹了你几脚。\n(HP -20，声望 -10)",
+        "actions": [
+          { "type": "stat", "target": "hp", "operation": "-", "value": 20 },
+          { "type": "stat", "target": "reputation", "operation": "-", "value": 10 }
+        ]
+      }
+    },
+    {
+      "id": "apologize",
+      "type": "story",
+      "position": { "x": 100, "y": 1250 },
+      "data": {
+        "label": "道歉赔偿",
+        "text": "你连忙道歉，掏出10金币请大汉喝酒。\f大汉哼了一声，勉强接受了你的道歉。\n(金币 -10，剩余 {$gold} 金币)"
       }
     },
     {
       "id": "relax",
       "type": "story",
       "position": { "x": 100, "y": 850 },
-      "data": { 
-        "label": "惬意", 
-        "text": "你感到一阵惬意，找了个角落坐下休息。"
+      "data": {
+        "label": "惬意",
+        "text": "你感到一阵惬意，找了个角落坐下休息。\f这时，一个神秘的老人向你走来……"
+      }
+    },
+    {
+      "id": "mysterious_old_man",
+      "type": "choice",
+      "position": { "x": 100, "y": 1050 },
+      "data": {
+        "label": "神秘老人",
+        "text": "老人浑浊的眼睛盯着你：\"年轻人，我看你骨骼清奇……想不想学一门绝技？\"\f只需要付出一点代价……",
+        "choices": [
+          { "id": "learn1", "text": "学习\"铁头功\"（消耗20金币）", "actions": [{ "type": "stat", "target": "gold", "operation": "-", "value": 20 }] },
+          { "id": "learn2", "text": "学习\"轻功水上漂\"（消耗30金币）", "actions": [{ "type": "stat", "target": "gold", "operation": "-", "value": 30 }] },
+          { "id": "learn3", "text": "拒绝老人", "actions": [] }
+        ]
+      }
+    },
+    {
+      "id": "learn_iron_head",
+      "type": "story",
+      "position": { "x": -50, "y": 1250 },
+      "data": {
+        "label": "习得铁头功",
+        "text": "老人传授了你铁头功的秘诀。\f你的头部变得坚硬无比！\n(最大生命值 +20，力量 +10)",
+        "actions": [
+          { "type": "stat", "target": "maxHp", "operation": "+", "value": 20 },
+          { "type": "stat", "target": "str", "operation": "+", "value": 10 },
+          { "type": "item", "target": "铁头功秘籍", "operation": "+" }
+        ]
+      }
+    },
+    {
+      "id": "learn_lightness",
+      "type": "story",
+      "position": { "x": 100, "y": 1350 },
+      "data": {
+        "label": "习得轻功",
+        "text": "老人传授了你轻功水上漂的奥秘。\f你感觉身体轻盈了许多！\n(敏捷 +15)",
+        "actions": [
+          { "type": "stat", "target": "dex", "operation": "+", "value": 15 },
+          { "type": "item", "target": "轻功秘籍", "operation": "+" }
+        ]
+      }
+    },
+    {
+      "id": "refuse_old_man",
+      "type": "story",
+      "position": { "x": 250, "y": 1250 },
+      "data": {
+        "label": "拒绝老人",
+        "text": "你礼貌地拒绝了老人。\f老人叹了口气：\"可惜了……\"然后消失在人群中。"
       }
     },
     {
       "id": "read_note",
       "type": "choice",
       "position": { "x": 250, "y": 650 },
-      "data": { 
-        "label": "阅读纸条", 
+      "data": {
+        "label": "阅读纸条",
         "savePointId": "note_checkpoint",
-        "text": "你借着烛光阅读纸条：'午夜十二点，带上朗姆酒。'", 
+        "text": "你借着烛光阅读纸条：'午夜十二点，带上朗姆酒。'\f你目前拥有 {$item:神秘纸条} 张神秘纸条。",
         "choices": [
             { "id": "c1", "text": "前往西海岸" },
             { "id": "c2", "text": "把纸条扔了" }
@@ -149,8 +328,8 @@
       "id": "coast",
       "type": "story",
       "position": { "x": 200, "y": 850 },
-      "data": { 
-        "label": "西海岸", 
+      "data": {
+        "label": "西海岸",
         "text": "海浪拍打着礁石。你等到了午夜，一艘泛着绿光的破船缓缓浮出水面..."
       }
     },
@@ -173,7 +352,7 @@
       "position": { "x": 380, "y": 1250 },
       "data": {
         "label": "灯塔观察",
-        "text": "你躲在灯塔阴影里观察良久，确认附近没人注意你。\n(知识 +1)",
+        "text": "你躲在灯塔阴影里观察良久，确认附近没人注意你。\f你注意到船上似乎有一个发光的宝箱。\n(知识 +1)",
         "actions": [
           { "type": "stat", "target": "knowledge", "operation": "+", "value": 1 }
         ]
@@ -186,7 +365,7 @@
       "data": {
         "label": "登船",
         "savePointId": "board_ship_checkpoint",
-        "text": "你踩上甲板，湿冷的木板发出吱呀声。\n你隐约听见船舱深处传来锁链摩擦的声音……"
+        "text": "你踩上甲板，湿冷的木板发出吱呀声。\f你隐约听见船舱深处传来锁链摩擦的声音……"
       }
     },
     {
@@ -203,15 +382,250 @@
       }
     },
     {
-      "id": "treasure",
-      "type": "story",
+      "id": "check_has_torch",
+      "type": "condition",
       "position": { "x": -120, "y": 1650 },
       "data": {
-        "label": "船舱宝藏",
-        "text": "你在船舱深处找到一个生锈的箱子。打开后，里面是沉甸甸的古金币。\n(获得 古金币 x10)",
+        "label": "检查火把",
+        "conditions": [
+          { "type": "has_item", "target": "火把" }
+        ],
+        "conditionLogic": "AND"
+      }
+    },
+    {
+      "id": "cabin_with_light",
+      "type": "story",
+      "position": { "x": -250, "y": 1850 },
+      "data": {
+        "label": "有光的船舱",
+        "text": "你点燃火把，照亮了阴暗的船舱。\f在火光中，你看到一个生锈的铁箱和一本泛黄的航海日志。",
         "actions": [
-          { "type": "item", "target": "古金币", "operation": "+", "value": 10 }
+          { "type": "item", "target": "火把", "operation": "-", "value": 1 }
         ]
+      }
+    },
+    {
+      "id": "cabin_dark",
+      "type": "story",
+      "position": { "x": 0, "y": 1850 },
+      "data": {
+        "label": "黑暗的船舱",
+        "text": "船舱里漆黑一片，你只能摸索着前进。\f突然，你的手触碰到一个冰冷的物体……\n(HP -5，因为撞到了东西)",
+        "actions": [
+          { "type": "stat", "target": "hp", "operation": "-", "value": 5 }
+        ]
+      }
+    },
+    {
+      "id": "cabin_choice",
+      "type": "choice",
+      "position": { "x": -120, "y": 2050 },
+      "data": {
+        "label": "船舱探索",
+        "text": "你发现了一个箱子。旁边还有一本航海日志。",
+        "choices": [
+          { "id": "box1", "text": "打开箱子" },
+          { "id": "box2", "text": "阅读航海日志" },
+          { "id": "box3", "text": "两个都要" }
+        ]
+      }
+    },
+    {
+      "id": "treasure",
+      "type": "story",
+      "position": { "x": -250, "y": 2250 },
+      "data": {
+        "label": "船舱宝藏",
+        "text": "你打开生锈的箱子。里面是沉甸甸的古金币！\f(获得 古金币 x1d10+5)",
+        "actions": [
+          { "type": "item", "target": "古金币", "operation": "+", "value": "1d10+5" }
+        ]
+      }
+    },
+    {
+      "id": "read_log",
+      "type": "story",
+      "position": { "x": 0, "y": 2250 },
+      "data": {
+        "label": "航海日志",
+        "text": "日志记载：'1652年3月15日，我们发现了通往海神神殿的航线……'\f这是重要的情报！\n(知识 +3，获得航海日志)",
+        "actions": [
+          { "type": "stat", "target": "knowledge", "operation": "+", "value": 3 },
+          { "type": "item", "target": "航海日志", "operation": "+" }
+        ]
+      }
+    },
+    {
+      "id": "take_both",
+      "type": "story",
+      "position": { "x": -120, "y": 2350 },
+      "data": {
+        "label": "全部拿走",
+        "text": "贪心的你决定两个都要！\f你获得了金币和航海日志。\n(获得 古金币 x1d10+5，航海日志，知识 +3)",
+        "actions": [
+          { "type": "item", "target": "古金币", "operation": "+", "value": "1d10+5" },
+          { "type": "item", "target": "航海日志", "operation": "+" },
+          { "type": "stat", "target": "knowledge", "operation": "+", "value": 3 }
+        ]
+      }
+    },
+    {
+      "id": "ghost_appear",
+      "type": "story",
+      "position": { "x": -120, "y": 2550 },
+      "data": {
+        "label": "幽灵船长",
+        "text": "就在你准备离开时，一个半透明的身影从阴影中浮现。\f\"你……敢动我的宝物？\"幽灵船长的声音如同寒风刺骨。"
+      }
+    },
+    {
+      "id": "ghost_choice",
+      "type": "choice",
+      "position": { "x": -120, "y": 2750 },
+      "data": {
+        "label": "面对船长",
+        "savePointId": "ghost_captain_checkpoint",
+        "text": "幽灵船长挡住了你的去路。你现在有 {$gold} 金币，生命值 {$hp}。",
+        "choices": [
+          { "id": "g1", "text": "与幽灵战斗", "actions": [] },
+          { "id": "g2", "text": "尝试与幽灵交谈", "actions": [] },
+          { "id": "g3", "text": "交出所有宝物求饶", "actions": [] },
+          { "id": "g4", "text": "使用朗姆酒（如果有）", "actions": [] }
+        ]
+      }
+    },
+    {
+      "id": "check_has_rum",
+      "type": "condition",
+      "position": { "x": 150, "y": 2950 },
+      "data": {
+        "label": "检查朗姆酒",
+        "conditions": [
+          { "type": "has_item", "target": "朗姆酒" }
+        ],
+        "conditionLogic": "AND"
+      }
+    },
+    {
+      "id": "rum_success",
+      "type": "story",
+      "position": { "x": 100, "y": 3150 },
+      "data": {
+        "label": "朗姆酒生效",
+        "text": "你掏出朗姆酒。幽灵船长的眼睛亮了起来。\f\"朗姆酒！我已经……三百年没尝过了……\"\f他伸出虚幻的手接过酒瓶，满足地叹息。\n\"拿走吧，年轻人。这些宝物对我已经没有意义了。\"",
+        "actions": [
+          { "type": "item", "target": "朗姆酒", "operation": "-" },
+          { "type": "stat", "target": "reputation", "operation": "+", "value": 20 },
+          { "type": "item", "target": "船长的祝福", "operation": "+" }
+        ]
+      }
+    },
+    {
+      "id": "no_rum",
+      "type": "story",
+      "position": { "x": 250, "y": 3150 },
+      "data": {
+        "label": "没有朗姆酒",
+        "text": "你翻遍口袋，却没有找到朗姆酒。\f\"没有朗姆酒？那你来这里做什么！\"幽灵船长怒吼。\n(HP -10)",
+        "actions": [
+          { "type": "stat", "target": "hp", "operation": "-", "value": 10 }
+        ]
+      }
+    },
+    {
+      "id": "fight_ghost",
+      "type": "condition",
+      "position": { "x": -300, "y": 2950 },
+      "data": {
+        "label": "战斗检定",
+        "conditionMode": "check",
+        "checkTarget": "str",
+        "checkDice": "1d100"
+      }
+    },
+    {
+      "id": "fight_ghost_win",
+      "type": "story",
+      "position": { "x": -400, "y": 3150 },
+      "data": {
+        "label": "击败幽灵",
+        "text": "你挥拳打向幽灵船长，奇迹般地击中了他！\f幽灵船长惨叫着化为虚无，留下了一把发光的短剑。\n(获得 幽灵之刃，声望 +30)",
+        "actions": [
+          { "type": "item", "target": "幽灵之刃", "operation": "+" },
+          { "type": "stat", "target": "reputation", "operation": "+", "value": 30 }
+        ]
+      }
+    },
+    {
+      "id": "fight_ghost_lose",
+      "type": "story",
+      "position": { "x": -200, "y": 3150 },
+      "data": {
+        "label": "败给幽灵",
+        "text": "你的拳头穿过了幽灵的身体，毫无作用！\f幽灵船长发出冰冷的笑声，一掌将你击飞。\n(HP -25)",
+        "actions": [
+          { "type": "stat", "target": "hp", "operation": "-", "value": 25 }
+        ]
+      }
+    },
+    {
+      "id": "talk_ghost",
+      "type": "condition",
+      "position": { "x": -50, "y": 2950 },
+      "data": {
+        "label": "知识检定",
+        "conditions": [
+          { "type": "stat", "target": "knowledge", "operation": ">=", "value": 3 }
+        ],
+        "conditionLogic": "AND"
+      }
+    },
+    {
+      "id": "talk_success",
+      "type": "story",
+      "position": { "x": -100, "y": 3150 },
+      "data": {
+        "label": "交谈成功",
+        "text": "你镇定地说：\"船长，我知道你三百年前的冤屈。让我帮你沉冤昭雪。\"\f幽灵船长愣住了：\"你……怎么知道的？\"\f\"航海日志告诉我的。你是被副官背叛的。\"\f船长的眼中闪过一丝感激。\n(获得 船长的信物，声望 +20)",
+        "actions": [
+          { "type": "item", "target": "船长的信物", "operation": "+" },
+          { "type": "stat", "target": "reputation", "operation": "+", "value": 20 }
+        ]
+      }
+    },
+    {
+      "id": "talk_fail",
+      "type": "story",
+      "position": { "x": 0, "y": 3250 },
+      "data": {
+        "label": "交谈失败",
+        "text": "\"住嘴！我不想听废话！\"幽灵船长打断了你。\f你的知识不足以打动这个三百年的亡魂。\n(HP -10)",
+        "actions": [
+          { "type": "stat", "target": "hp", "operation": "-", "value": 10 }
+        ]
+      }
+    },
+    {
+      "id": "surrender",
+      "type": "story",
+      "position": { "x": -50, "y": 3050 },
+      "data": {
+        "label": "交出宝物",
+        "text": "你颤抖着将所有宝物放在地上。\f\"算你识相。\"幽灵船长冷哼一声。\f你保住了性命，但失去了所有收获。\n(失去所有古金币，失去航海日志)",
+        "actions": [
+          { "type": "item", "target": "古金币", "operation": "=", "value": 0 },
+          { "type": "item", "target": "航海日志", "operation": "-" }
+        ]
+      }
+    },
+    {
+      "id": "escape_ship",
+      "type": "story",
+      "position": { "x": -120, "y": 3450 },
+      "data": {
+        "label": "逃离幽灵船",
+        "text": "你拼尽全力冲向甲板，跳入冰冷的海水中。\f回头望去，幽灵船已经沉入海底，仿佛从未存在过……"
       }
     },
     {
@@ -227,9 +641,188 @@
       "id": "throw_note",
       "type": "story",
       "position": { "x": 400, "y": 850 },
-      "data": { 
-        "label": "丢弃", 
+      "data": {
+        "label": "丢弃",
         "text": "你觉得这纯属无稽之谈，把纸条揉成一团丢进了垃圾桶。"
+      }
+    },
+    {
+      "id": "random_encounter",
+      "type": "story",
+      "position": { "x": -120, "y": 3650 },
+      "data": {
+        "label": "随机事件",
+        "text": "你游上岸，筋疲力尽地躺在沙滩上。\f远处传来马蹄声……"
+      }
+    },
+    {
+      "id": "merchant_encounter",
+      "type": "story",
+      "position": { "x": -250, "y": 3850 },
+      "data": {
+        "label": "遇到商人",
+        "text": "一个骑马的商人停在你面前。\f\"年轻人，你看起来需要帮助。这里有些干粮和火把，拿去吧。\"\n(获得 干粮 x3，火把 x2)",
+        "actions": [
+          { "type": "item", "target": "干粮", "operation": "+", "value": 3 },
+          { "type": "item", "target": "火把", "operation": "+", "value": 2 }
+        ]
+      }
+    },
+    {
+      "id": "patrol_encounter",
+      "type": "story",
+      "position": { "x": 0, "y": 3850 },
+      "data": {
+        "label": "遇到巡逻队",
+        "text": "一队巡逻兵发现了你。\f\"站住！你为什么在这里？\"\f你解释了自己的遭遇，巡逻队长半信半疑，但还是放你走了。\n(声望 +5)",
+        "actions": [
+          { "type": "stat", "target": "reputation", "operation": "+", "value": 5 }
+        ]
+      }
+    },
+    {
+      "id": "final_status",
+      "type": "condition",
+      "position": { "x": -120, "y": 4050 },
+      "data": {
+        "label": "结局判定",
+        "conditions": [
+          { "type": "stat", "target": "reputation", "operation": ">=", "value": 20 },
+          { "type": "stat", "target": "knowledge", "operation": ">=", "value": 3 }
+        ],
+        "conditionLogic": "OR"
+      }
+    },
+    {
+      "id": "good_ending",
+      "type": "story",
+      "position": { "x": -250, "y": 4250 },
+      "data": {
+        "label": "好结局",
+        "text": "你的冒险故事传遍了整个港口。\f人们称你为\"幽灵船的征服者\"。\f酒馆老板免费请你喝酒，商人们争相与你合作。\n\n【好结局】你的名声和知识让你成为了这片海域的传奇。\n\n最终状态：\n金币：{$gold}\n声望：{$reputation}\n知识：{$knowledge}\n生命值：{$hp}/{$maxHp}"
+      }
+    },
+    {
+      "id": "normal_ending",
+      "type": "story",
+      "position": { "x": 0, "y": 4250 },
+      "data": {
+        "label": "普通结局",
+        "text": "你回到了黑鱼酒馆，点了一杯啤酒。\f这次冒险虽然惊险，但收获不多。\f也许下次会更好吧。\n\n【普通结局】平淡的冒险，平凡的生活。\n\n最终状态：\n金币：{$gold}\n声望：{$reputation}\n生命值：{$hp}/{$maxHp}"
+      }
+    },
+    {
+      "id": "after_fight_check",
+      "type": "condition",
+      "position": { "x": -150, "y": 1650 },
+      "data": {
+        "label": "战斗后状态",
+        "conditions": [
+          { "type": "stat", "target": "hp", "operation": ">", "value": 0 }
+        ],
+        "conditionLogic": "AND"
+      }
+    },
+    {
+      "id": "death_ending",
+      "type": "story",
+      "position": { "x": -300, "y": 1850 },
+      "data": {
+        "label": "死亡结局",
+        "text": "你的生命值降到了0……\f眼前一黑，你倒在了地上。\n\n【死亡结局】你的冒险在这里结束了。\n也许下次会更幸运吧。",
+        "actions": []
+      }
+    },
+    {
+      "id": "survive_fight",
+      "type": "story",
+      "position": { "x": 0, "y": 1850 },
+      "data": {
+        "label": "战斗后续",
+        "text": "你揉了揉酸痛的身体，艰难地站起来。\f今晚的酒馆真是太刺激了……\n当前生命值：{$hp}/{$maxHp}"
+      }
+    },
+    {
+      "id": "buy_supplies",
+      "type": "choice",
+      "position": { "x": 0, "y": 2050 },
+      "data": {
+        "label": "购买补给",
+        "text": "酒馆老板悄悄走过来：\"看你挺能打的，要不要买点东西？\"\n你有 {$gold} 金币。",
+        "choices": [
+          { "id": "buy1", "text": "买火把 (5金币)", "actions": [{ "type": "stat", "target": "gold", "operation": "-", "value": 5 }, { "type": "item", "target": "火把", "operation": "+", "value": 1 }] },
+          { "id": "buy2", "text": "买朗姆酒 (10金币)", "actions": [{ "type": "stat", "target": "gold", "operation": "-", "value": 10 }, { "type": "item", "target": "朗姆酒", "operation": "+", "value": 1 }] },
+          { "id": "buy3", "text": "买疗伤药 (15金币)", "actions": [{ "type": "stat", "target": "gold", "operation": "-", "value": 15 }, { "type": "item", "target": "疗伤药", "operation": "+", "value": 1 }] },
+          { "id": "buy4", "text": "不买了", "actions": [] }
+        ]
+      }
+    },
+    {
+      "id": "after_buy",
+      "type": "story",
+      "position": { "x": 0, "y": 2250 },
+      "data": {
+        "label": "购物完成",
+        "text": "交易完成。\f\"祝你好运，冒险者。\"老板意味深长地说。\n\n你现在持有的物品可以通过查看状态来确认。"
+      }
+    },
+    {
+      "id": "back_to_bar",
+      "type": "choice",
+      "position": { "x": 0, "y": 2450 },
+      "data": {
+        "label": "接下来",
+        "text": "夜还很长。你接下来想做什么？",
+        "choices": [
+          { "id": "next1", "text": "去听幽灵船的传闻", "actions": [] },
+          { "id": "next2", "text": "直接前往西海岸", "actions": [] },
+          { "id": "next3", "text": "今晚就到这里", "actions": [] }
+        ]
+      }
+    },
+    {
+      "id": "rest_ending",
+      "type": "story",
+      "position": { "x": 200, "y": 2650 },
+      "data": {
+        "label": "休息结局",
+        "text": "你决定今晚不再折腾，找了间客房休息。\f明天又是新的一天。\n\n【休息结局】谨慎的选择，保存实力。\n\n最终状态：\n金币：{$gold}\n生命值：{$hp}/{$maxHp}"
+      }
+    },
+    {
+      "id": "steal_ending",
+      "type": "story",
+      "position": { "x": 450, "y": 950 },
+      "data": {
+        "label": "偷窃结局",
+        "text": "你拿着藏宝图悄悄离开了酒馆。\\f今晚的收获不错，但你总觉得有人在暗中注视着你……\\n\\n【偷窃结局】你得到了宝物，但也许会有麻烦找上门。\\n\\n最终状态：\\n金币：{$gold}\\n声望：{$reputation}"
+      }
+    },
+    {
+      "id": "kicked_out_ending",
+      "type": "story",
+      "position": { "x": 650, "y": 950 },
+      "data": {
+        "label": "被赶出结局",
+        "text": "你躺在酒馆外的街道上，浑身酸痛。\\f今晚的冒险以失败告终。\\n也许下次应该更谨慎一些。\\n\\n【被赶出结局】偷鸡不成蚀把米。\\n\\n最终状态：\\n金币：{$gold}\\n生命值：{$hp}\\n声望：{$reputation}"
+      }
+    },
+    {
+      "id": "give_up_ending",
+      "type": "story",
+      "position": { "x": 400, "y": 1050 },
+      "data": {
+        "label": "放弃结局",
+        "text": "你决定不去追查那个传闻。\\f也许有些秘密还是不知道的好。\\n你回到了平静的生活中。\\n\\n【放弃结局】明智的选择？还是胆怯的逃避？\\n\\n最终状态：\\n金币：{$gold}"
+      }
+    },
+    {
+      "id": "retreat_ending",
+      "type": "story",
+      "position": { "x": 300, "y": 1850 },
+      "data": {
+        "label": "撤退结局",
+        "text": "你离开了这片诡异的海岸。\\f幽灵船的秘密仍然埋藏在迷雾之中。\\n也许有一天你会再回来，带着更充分的准备。\\n\\n【撤退结局】活着才是最重要的。\\n\\n最终状态：\\n金币：{$gold}\\n知识：{$knowledge}"
       }
     }
   ],
@@ -250,20 +843,117 @@
     { "id": "e13", "source": "ghost_ship_choice", "sourceHandle": "b2", "target": "watch_lighthouse", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e14", "source": "watch_lighthouse", "target": "board_ship", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e15", "source": "board_ship", "target": "below_deck", "markerEnd": { "type": "arrowclosed" } },
-    { "id": "e16", "source": "below_deck", "sourceHandle": "d1", "target": "treasure", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e16", "source": "below_deck", "sourceHandle": "d1", "target": "check_has_torch", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e17", "source": "below_deck", "sourceHandle": "d2", "target": "leave_sea", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e_steal_s", "source": "check_steal", "sourceHandle": "success", "target": "steal_success", "markerEnd": { "type": "arrowclosed" } },
     { "id": "e_steal_f", "source": "check_steal", "sourceHandle": "failure", "target": "steal_fail", "markerEnd": { "type": "arrowclosed" } },
-    { "id": "e_steal_gs", "source": "check_steal", "sourceHandle": "great_success", "target": "steal_success", "markerEnd": { "type": "arrowclosed" } },
-    { "id": "e_steal_gf", "source": "check_steal", "sourceHandle": "great_failure", "target": "steal_fail", "markerEnd": { "type": "arrowclosed" } }
+    { "id": "e_steal_gs", "source": "check_steal", "sourceHandle": "great_success", "target": "steal_great_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal_gf", "source": "check_steal", "sourceHandle": "great_failure", "target": "steal_great_fail", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_drunk1", "source": "drunk_fight", "target": "fight_choice", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fight1", "source": "fight_choice", "sourceHandle": "fight1", "target": "check_punch", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fight2", "source": "fight_choice", "sourceHandle": "fight2", "target": "check_dodge", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fight3", "source": "fight_choice", "sourceHandle": "fight3", "target": "apologize", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_punch_s", "source": "check_punch", "sourceHandle": "success", "target": "punch_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_punch_gs", "source": "check_punch", "sourceHandle": "great_success", "target": "punch_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_punch_f", "source": "check_punch", "sourceHandle": "failure", "target": "punch_fail", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_punch_gf", "source": "check_punch", "sourceHandle": "great_failure", "target": "punch_fail", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_dodge_s", "source": "check_dodge", "sourceHandle": "success", "target": "dodge_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_dodge_gs", "source": "check_dodge", "sourceHandle": "great_success", "target": "dodge_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_dodge_f", "source": "check_dodge", "sourceHandle": "failure", "target": "dodge_fail", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_dodge_gf", "source": "check_dodge", "sourceHandle": "great_failure", "target": "dodge_fail", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_ps_to_check", "source": "punch_success", "target": "after_fight_check", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_pf_to_check", "source": "punch_fail", "target": "after_fight_check", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_ds_to_check", "source": "dodge_success", "target": "after_fight_check", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_df_to_check", "source": "dodge_fail", "target": "after_fight_check", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_ap_to_check", "source": "apologize", "target": "after_fight_check", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fc_dead", "source": "after_fight_check", "sourceHandle": "false", "target": "death_ending", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fc_alive", "source": "after_fight_check", "sourceHandle": "true", "target": "survive_fight", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_survive_buy", "source": "survive_fight", "target": "buy_supplies", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_buy1", "source": "buy_supplies", "sourceHandle": "buy1", "target": "after_buy", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_buy2", "source": "buy_supplies", "sourceHandle": "buy2", "target": "after_buy", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_buy3", "source": "buy_supplies", "sourceHandle": "buy3", "target": "after_buy", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_buy4", "source": "buy_supplies", "sourceHandle": "buy4", "target": "after_buy", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_after_buy", "source": "after_buy", "target": "back_to_bar", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_back1", "source": "back_to_bar", "sourceHandle": "next1", "target": "rumor", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_back2", "source": "back_to_bar", "sourceHandle": "next2", "target": "coast", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_back3", "source": "back_to_bar", "sourceHandle": "next3", "target": "rest_ending", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_relax", "source": "relax", "target": "mysterious_old_man", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_learn1", "source": "mysterious_old_man", "sourceHandle": "learn1", "target": "learn_iron_head", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_learn2", "source": "mysterious_old_man", "sourceHandle": "learn2", "target": "learn_lightness", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_learn3", "source": "mysterious_old_man", "sourceHandle": "learn3", "target": "refuse_old_man", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_ih_buy", "source": "learn_iron_head", "target": "buy_supplies", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_lg_buy", "source": "learn_lightness", "target": "buy_supplies", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_rf_buy", "source": "refuse_old_man", "target": "buy_supplies", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_torch_yes", "source": "check_has_torch", "sourceHandle": "true", "target": "cabin_with_light", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_torch_no", "source": "check_has_torch", "sourceHandle": "false", "target": "cabin_dark", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_cabin_light", "source": "cabin_with_light", "target": "cabin_choice", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_cabin_dark", "source": "cabin_dark", "target": "cabin_choice", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_box1", "source": "cabin_choice", "sourceHandle": "box1", "target": "treasure", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_box2", "source": "cabin_choice", "sourceHandle": "box2", "target": "read_log", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_box3", "source": "cabin_choice", "sourceHandle": "box3", "target": "take_both", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_treasure_ghost", "source": "treasure", "target": "ghost_appear", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_log_ghost", "source": "read_log", "target": "ghost_appear", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_both_ghost", "source": "take_both", "target": "ghost_appear", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_ghost_choice", "source": "ghost_appear", "target": "ghost_choice", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_gc1", "source": "ghost_choice", "sourceHandle": "g1", "target": "fight_ghost", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_gc2", "source": "ghost_choice", "sourceHandle": "g2", "target": "talk_ghost", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_gc3", "source": "ghost_choice", "sourceHandle": "g3", "target": "surrender", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_gc4", "source": "ghost_choice", "sourceHandle": "g4", "target": "check_has_rum", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_fg_win", "source": "fight_ghost", "sourceHandle": "success", "target": "fight_ghost_win", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fg_gwin", "source": "fight_ghost", "sourceHandle": "great_success", "target": "fight_ghost_win", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fg_lose", "source": "fight_ghost", "sourceHandle": "failure", "target": "fight_ghost_lose", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fg_glose", "source": "fight_ghost", "sourceHandle": "great_failure", "target": "fight_ghost_lose", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_talk_s", "source": "talk_ghost", "sourceHandle": "true", "target": "talk_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_talk_f", "source": "talk_ghost", "sourceHandle": "false", "target": "talk_fail", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_rum_yes", "source": "check_has_rum", "sourceHandle": "true", "target": "rum_success", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_rum_no", "source": "check_has_rum", "sourceHandle": "false", "target": "no_rum", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_fgw_escape", "source": "fight_ghost_win", "target": "escape_ship", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_fgl_escape", "source": "fight_ghost_lose", "target": "escape_ship", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_ts_escape", "source": "talk_success", "target": "escape_ship", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_tf_escape", "source": "talk_fail", "target": "escape_ship", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_sr_escape", "source": "surrender", "target": "escape_ship", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_rum_s_escape", "source": "rum_success", "target": "escape_ship", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_rum_n_escape", "source": "no_rum", "target": "escape_ship", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_escape_random", "source": "escape_ship", "target": "random_encounter", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_random1", "source": "random_encounter", "target": "merchant_encounter", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_random2", "source": "random_encounter", "target": "patrol_encounter", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_merchant_final", "source": "merchant_encounter", "target": "final_status", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_patrol_final", "source": "patrol_encounter", "target": "final_status", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_final_good", "source": "final_status", "sourceHandle": "true", "target": "good_ending", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_final_normal", "source": "final_status", "sourceHandle": "false", "target": "normal_ending", "markerEnd": { "type": "arrowclosed" } },
+
+    { "id": "e_steal_s_end", "source": "steal_success", "target": "steal_ending", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal_gs_end", "source": "steal_great_success", "target": "steal_ending", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal_f_end", "source": "steal_fail", "target": "kicked_out_ending", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_steal_gf_end", "source": "steal_great_fail", "target": "kicked_out_ending", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_throw_note_end", "source": "throw_note", "target": "give_up_ending", "markerEnd": { "type": "arrowclosed" } },
+    { "id": "e_leave_sea_end", "source": "leave_sea", "target": "retreat_ending", "markerEnd": { "type": "arrowclosed" } }
   ],
   "settings": {
     "pluginName": "TavernTales",
     "commandName": "tt",
-    "version": "1.0.0",
+    "version": "2.0.0",
     "author": "BlackfishUser",
-    "description": "一个关于酒馆、传闻与幽灵船的短篇互动故事。",
+    "description": "一个关于酒馆、传闻与幽灵船的完整互动故事。包含战斗、交易、多分支结局。",
     "homepage": "https://github.com/blackfish/stories",
+    "subCommands": {
+      "start": { "name": "start", "help": "开始新游戏" },
+      "next": { "name": "next", "help": "继续剧情" },
+      "choose": { "name": "choose", "help": "选择选项" },
+      "stat": { "name": "stat", "help": "查看状态" },
+      "load": { "name": "load", "help": "读取存档" },
+      "reset": { "name": "reset", "help": "重置游戏" }
+    },
     "diceRules": {
         "defaultDice": "1d100",
         "successMode": "lte",
