@@ -81,8 +81,6 @@ const ConditionNodeComponent = ({ data, isConnectable }: NodeProps) => {
             </div>
         ) : (
             <div className="flex justify-between items-center text-[10px] font-bold relative h-4 w-full">
-                 {/* Handles for Check Mode: Success, Failure, Great Success, Great Failure */}
-                 {/* Layout: spread out handles */}
                  
                  <div className="absolute left-0 -ml-1 text-center">
                     <div className="text-yellow-600 scale-75 whitespace-nowrap">大成功</div>

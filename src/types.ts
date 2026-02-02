@@ -19,10 +19,10 @@ export interface ProjectSettings {
   homepage?: string;
   filename?: string;
   diceRules?: {
-      criticalSuccess: number; // e.g. 5
-      criticalFailure: number; // e.g. 96
-      defaultDice?: string; // e.g. '1d100'
-      successMode?: 'lte' | 'gte'; // 'lte' (<=) or 'gte' (>=)
+      criticalSuccess: number; 
+      criticalFailure: number; 
+      defaultDice?: string; 
+      successMode?: 'lte' | 'gte'; 
       criticalSuccessMode?: 'lte' | 'gte';
       criticalFailureMode?: 'lte' | 'gte';
   };
@@ -58,17 +58,15 @@ export interface NodeData {
   script?: string;
   actions?: ActionItem[];
   
-  // Condition Node - Logic Mode
   condition?: string;
   conditions?: ConditionItem[];
   conditionLogic?: 'AND' | 'OR';
   
-  // Condition Node - Dice Check Mode
   conditionMode?: 'logic' | 'check';
-  checkTarget?: string; // Stat name e.g. 'str' or fixed value '50'
-  checkDice?: string; // e.g. '1d100'
+  checkTarget?: string; 
+  checkDice?: string; 
 
-  savePointId?: string; // Identifier for save point
+  savePointId?: string; 
 
   isStart?: boolean;
   choices?: ChoiceOption[];

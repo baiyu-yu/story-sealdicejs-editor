@@ -504,7 +504,6 @@ main();
 `;
 
 export const generatePlugin = (nodes: Node[], edges: Edge[], settings: ProjectSettings): void => {
-  // Transform ReactFlow graph to Story Data
   const storyNodes: Record<string, any> = {};
   let startNodeId = null;
 
@@ -520,11 +519,9 @@ export const generatePlugin = (nodes: Node[], edges: Edge[], settings: ProjectSe
         nodeData.savePointId = node.data.savePointId;
     }
 
-    // Compile Visual Actions to Script
     if (node.data.actions) {
         nodeData.script = compileActions(node.data.actions as ActionItem[]);
     } else if (node.data.script) {
-        // Fallback for legacy script input
         nodeData.script = node.data.script;
     }
 
@@ -550,13 +547,10 @@ export const generatePlugin = (nodes: Node[], edges: Edge[], settings: ProjectSe
       }
       nodeData.choices = choices;
     } else if (node.type === 'condition') {
-       // Check if Dice Mode
        if (node.data.conditionMode === 'check') {
            nodeData.type = 'check';
            nodeData.checkTarget = node.data.checkTarget;
            nodeData.checkDice = node.data.checkDice;
-           // Rules from settings, but for now we pass simple map
-           // Edges for check: success, failure, great_success, great_failure
            const successEdge = edges.find(e => e.source === node.id && e.sourceHandle === 'success');
            const failureEdge = edges.find(e => e.source === node.id && e.sourceHandle === 'failure');
            const greatSuccessEdge = edges.find(e => e.source === node.id && e.sourceHandle === 'great_success');
@@ -567,7 +561,6 @@ export const generatePlugin = (nodes: Node[], edges: Edge[], settings: ProjectSe
            nodeData.nextGreatSuccess = greatSuccessEdge?.target;
            nodeData.nextGreatFailure = greatFailureEdge?.target;
        } else {
-           // Compile Visual Conditions
            if (node.data.conditions) {
                nodeData.condition = compileConditions(node.data.conditions as ConditionItem[], (node.data.conditionLogic as string) || 'AND');
            } else {
@@ -580,21 +573,17 @@ export const generatePlugin = (nodes: Node[], edges: Edge[], settings: ProjectSe
            nodeData.nextFalse = falseEdge?.target;
        }
     } else {
-      // Story node - handle potential random branching
       const outgoingEdges = edges.filter(e => e.source === node.id);
       
       if (outgoingEdges.length > 1) {
-          // Multiple edges from a story node -> Random Branch
           nodeData.randomNext = outgoingEdges.map(e => ({
               next: e.target,
               weight: Number(e.data?.weight) || 1
           }));
           nodeData.totalWeight = nodeData.randomNext.reduce((a: number, b: any) => a + b.weight, 0);
       } else if (outgoingEdges.length === 1) {
-          // Single edge -> Direct transition
           nodeData.next = outgoingEdges[0].target;
       } else {
-          // No outgoing edges -> End of Story
           nodeData.isEnd = true;
       }
     }

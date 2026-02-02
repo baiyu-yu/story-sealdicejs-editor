@@ -127,12 +127,10 @@ export default function Editor() {
     return `${settings.pluginName} Story:\n.${settings.commandName} ${cmdStart} - ${descStart}\n.${settings.commandName} ${cmdNext} - ${descNext}\n.${settings.commandName} ${cmdChoose} <index> - ${descChoose}\n.${settings.commandName} ${cmdStat} - ${descStat}\n.${settings.commandName} ${cmdLoad} <id> - ${descLoad}\n.${settings.commandName} ${cmdReset} - ${descReset}\n.${settings.commandName} ${cmdClear} - ${descClear}`;
   })();
   
-  // Undo/Redo Stacks
   const [history, setHistory] = useState<{nodes: AppNode[], edges: any[]}[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const isUndoRedoAction = useRef(false);
 
-  // Initialize history with initial state
   useEffect(() => {
       setHistory([{ nodes: JSON.parse(JSON.stringify(INITIAL_NODES)), edges: [] }]);
       setHistoryIndex(0);
@@ -481,10 +479,7 @@ export default function Editor() {
           <MiniMap />
           <Background gap={12} size={1} />
           
-          {/* Header Bar removed as it is now in App.tsx */}
-
           <Panel position="top-left" className="bg-white p-1 md:p-2 rounded shadow flex flex-wrap gap-1 md:gap-2 max-w-[calc(100vw-20px)] overflow-y-auto max-h-[30vh] md:max-h-none items-center">
-            {/* Add Nodes Group */}
             <div className="flex items-center gap-1">
               <button
                 className="flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs md:text-sm whitespace-nowrap"
@@ -508,7 +503,6 @@ export default function Editor() {
             
             <div className="w-px h-4 bg-gray-300 mx-0.5 md:h-6 md:mx-1 flex-shrink-0"></div>
             
-            {/* Layout & Mode Group */}
             <div className="flex items-center gap-1">
                <button
                 className="flex items-center gap-1 px-2 py-1 bg-cyan-600 text-white rounded hover:bg-cyan-700 text-xs md:text-sm whitespace-nowrap"
@@ -527,10 +521,8 @@ export default function Editor() {
               </button>
             </div>
 
-            {/* Mobile-only Groups (Hidden on Desktop) */}
             <div className="flex md:hidden items-center gap-1 flex-wrap">
                 <div className="w-px h-4 bg-gray-300 mx-0.5 flex-shrink-0"></div>
-                {/* Edit Group Mobile */}
                 <button
                     className={`flex items-center gap-1 px-2 py-1 rounded text-xs flex-shrink-0 ${historyIndex > 0 ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
                     onClick={handleUndo}
@@ -616,9 +608,7 @@ export default function Editor() {
             </div>
           </Panel>
 
-          {/* Desktop-only Right Panel */}
           <Panel position="top-right" className="hidden md:flex bg-white p-2 rounded shadow gap-2 items-center">
-            {/* Edit Group */}
             <div className="flex items-center gap-1">
               <button
                 className={`flex items-center gap-1 px-2 py-1 rounded text-sm flex-shrink-0 ${historyIndex > 0 ? 'bg-gray-600 text-white hover:bg-gray-700' : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
@@ -653,7 +643,6 @@ export default function Editor() {
 
             <div className="w-px h-6 bg-gray-300 mx-1 flex-shrink-0"></div>
 
-            {/* File & Settings Group */}
             <div className="flex items-center gap-1">
                {!nodes.find(n => n.data.isStart) && (
                   <button
